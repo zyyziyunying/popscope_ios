@@ -1,8 +1,7 @@
 name: popscope_ios
 description: "A new Flutter Plugin for iOS."
 version: 0.0.1
-author: stringwu
-homepage:
+repository: https://github.com/WoodJim/popscope_ios
 
 environment:
   sdk: ^3.8.0
