@@ -46,7 +46,7 @@ public class PopscopeIosPlugin: NSObject, FlutterPlugin, UIGestureRecognizerDele
 //       DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
 //         self?.setupInteractivePopGestureIfNeeded()
 //       }
-//       return
+//       returnwindow?.rootViewController = navigationController
 //     }
 //
 //     isSetup = true
@@ -58,10 +58,22 @@ public class PopscopeIosPlugin: NSObject, FlutterPlugin, UIGestureRecognizerDele
 
         if let navController = rootViewController as? UINavigationController {
                 self.navigationController = navController
-                print("PopscopeIosPlugin: window2222")
+                print("PopscopeIosPlugin: Found existing NavigationController")
          } else if let flutterVC = rootViewController as? FlutterViewController {
-                self.navigationController = flutterVC.navigationController
-                print("PopscopeIosPlugin: window33333")
+                // 如果 FlutterViewController 已经有 navigationController，直接使用
+                if let existingNavController = flutterVC.navigationController {
+                    self.navigationController = existingNavController
+                    print("PopscopeIosPlugin: Using FlutterViewController's existing NavigationController")
+                } else {
+                    // 否则创建新的 NavigationController 并封装 FlutterViewController
+                    // 先将 window.rootViewController 设置为 nil，避免视图层次冲突
+                    window.rootViewController = nil
+                    let newNavController = UINavigationController(rootViewController: flutterVC)
+                    self.navigationController = newNavController
+                    // 再设置新的 NavigationController 为 rootViewController
+                    window.rootViewController = newNavController
+                    print("PopscopeIosPlugin: Created new NavigationController and set as rootViewController")
+                }
          }
     setupInteractivePopGesture()
   }
