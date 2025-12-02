@@ -25,7 +25,7 @@
 
 ```yaml
 dependencies:
-  popscope_ios: ^1.0.0
+  popscope_ios: ^0.0.1
 ```
 
 然后运行：

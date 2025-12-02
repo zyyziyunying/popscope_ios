@@ -89,7 +89,16 @@ class HomePage extends StatelessWidget {
         title: const Text('PopScope 示例'),
         backgroundColor: Colors.blue,
       ),
-      body: Center(
+      body: PopScope(
+          canPop: false,
+          onPopInvokedWithResult: (value, _) {
+            if (!value) {
+              // do custom action
+              Navigator.pop(context);
+            }
+          },
+          child:
+      Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -134,7 +143,7 @@ class HomePage extends StatelessWidget {
             ),
           ],
         ),
-      ),
+      )),
     );
   }
 }
