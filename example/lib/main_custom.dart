@@ -13,14 +13,13 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 void main() {
   // 确保 Flutter 绑定已初始化
   WidgetsFlutterBinding.ensureInitialized();
-  
-  final plugin = PopscopeIos();
+
   
   // 设置 Navigator Key，但禁用自动处理
-  plugin.setNavigatorKey(navigatorKey, autoHandle: false);
+  PopscopeIos.setNavigatorKey(navigatorKey, autoHandle: false);
   
   // 自定义返回手势处理
-  plugin.setOnSystemBackGesture(() {
+  PopscopeIos.setOnLeftBackGesture(() {
     final context = navigatorKey.currentContext;
     if (context != null && Navigator.of(context).canPop()) {
       // 显示确认对话框

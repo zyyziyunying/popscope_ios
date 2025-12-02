@@ -78,12 +78,6 @@ class MethodChannelPopscopeIos extends PopscopeIosPlatform {
   }
 
   @override
-  Future<void> setup() async {
-    _ensureHandlerInitialized();
-    await methodChannel.invokeMethod<void>('setup');
-  }
-
-  @override
   Future<String?> getPlatformVersion() async {
     _ensureHandlerInitialized();
     final version = await methodChannel.invokeMethod<String>('getPlatformVersion');

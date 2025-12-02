@@ -23,7 +23,7 @@ void main() {
   // plugin.setNavigatorKey(navigatorKey);
   
   // 添加自定义回调来记录事件（可选）
-  plugin.setOnSystemBackGesture(() {
+  PopscopeIos.setOnLeftBackGesture(() {
     debugPrint('🔙 iOS 侧滑手势被触发！系统已自动调用 Navigator.maybePop()');
   });
   

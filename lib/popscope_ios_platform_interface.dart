@@ -29,11 +29,6 @@ abstract class PopscopeIosPlatform extends PlatformInterface {
     throw UnimplementedError('platformVersion() has not been implemented.');
   }
 
-  /// 手动触发插件设置（通常不需要调用，插件会自动初始化）
-  Future<void> setup() {
-    throw UnimplementedError('setup() has not been implemented.');
-  }
-
   /// 设置系统返回手势的回调
   void setOnSystemBackGesture(VoidCallback? callback) {
     throw UnimplementedError('setOnSystemBackGesture() has not been implemented.');

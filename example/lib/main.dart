@@ -12,8 +12,7 @@ void main() {
   WidgetsFlutterBinding.ensureInitialized();
   
   // 设置 Navigator Key，启用自动导航处理
-  final plugin = PopscopeIos();
-  plugin.setNavigatorKey(navigatorKey);
+  PopscopeIos.setNavigatorKey(navigatorKey);
   
   runApp(const MyApp());
 }
@@ -61,7 +60,7 @@ class _MyAppState extends State<MyApp> {
 
   // 设置系统返回手势监听
   void setupBackGestureListener() {
-    _popscopeIosPlugin.setOnSystemBackGesture(() {
+    PopscopeIos.setOnLeftBackGesture(() {
       debugPrint('检测到系统返回手势！系统已自动调用 Navigator.maybePop()');
       
       // 更新计数（用于 UI 显示）
