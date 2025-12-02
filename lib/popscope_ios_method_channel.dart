@@ -45,7 +45,7 @@ class MethodChannelPopscopeIos extends PopscopeIosPlatform {
     switch (call.method) {
       case 'onSystemBackGesture':
         // 当接收到系统返回手势时
-        
+        debugPrint('PopscopeIos: onSystemBackGesture pop');
         // 1. 如果设置了自动处理导航，尝试调用 maybePop()
         if (_autoHandleNavigation) {
           final navigator = _navigatorKey?.currentState;

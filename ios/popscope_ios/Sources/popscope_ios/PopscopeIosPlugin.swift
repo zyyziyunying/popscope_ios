@@ -131,12 +131,17 @@ public class PopscopeIosPlugin: NSObject, FlutterPlugin, UIGestureRecognizerDele
 //     if navController.viewControllers.count <= 1 {
 //       return false
 //     }
-    
+    print("PopscopeIosPlugin: onSystemBackGesture call=")
     // 检测到系统左滑手势，发送事件给 Flutter
     if gestureRecognizer == self.navigationController?.interactivePopGestureRecognizer {
       channel?.invokeMethod("onSystemBackGesture", arguments: nil)
        print("PopscopeIosPlugin: onSystemBackGesture call")
       return false
+    }
+    
+    // 其他手势交由原来的代理处理
+    if let originalDelegate = self.originalDelegate {
+      return originalDelegate.gestureRecognizerShouldBegin?(gestureRecognizer) ?? true
     }
     
     return true

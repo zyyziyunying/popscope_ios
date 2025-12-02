@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:popscope_ios/popscope_ios.dart';
 
 // 创建全局 Navigator Key
-final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+// final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 /// PopScope 示例：展示如何使用 PopScope(canPop: false) 配合 onPopInvoked
 /// 
@@ -19,8 +19,8 @@ void main() {
   
   final plugin = PopscopeIos();
   
-  // 设置 Navigator Key，启用自动导航处理
-  plugin.setNavigatorKey(navigatorKey);
+  // // 设置 Navigator Key，启用自动导航处理
+  // plugin.setNavigatorKey(navigatorKey);
   
   // 添加自定义回调来记录事件（可选）
   plugin.setOnSystemBackGesture(() {
@@ -66,61 +66,73 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      navigatorKey: navigatorKey,
+      // navigatorKey: navigatorKey,
       theme: ThemeData(
         primarySwatch: Colors.blue,
         useMaterial3: true,
       ),
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('PopScope 示例'),
-          backgroundColor: Colors.blue,
-        ),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.science, size: 80, color: Colors.blue),
-              const SizedBox(height: 30),
-              const Text(
-                'PopScope Widget 测试',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+      home: HomePage(platformVersion: _platformVersion),
+    );
+  }
+}
+
+/// 首页 Widget
+class HomePage extends StatelessWidget {
+  final String platformVersion;
+
+  const HomePage({super.key, required this.platformVersion});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('PopScope 示例'),
+        backgroundColor: Colors.blue,
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.science, size: 80, color: Colors.blue),
+            const SizedBox(height: 30),
+            const Text(
+              'PopScope Widget 测试',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'Running on: $platformVersion',
+              style: const TextStyle(fontSize: 14, color: Colors.grey),
+            ),
+            const SizedBox(height: 40),
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const PopScopeTestPage(),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.arrow_forward),
+              label: const Text('测试 PopScope'),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
               ),
-              const SizedBox(height: 20),
-              Text(
-                'Running on: $_platformVersion',
-                style: const TextStyle(fontSize: 14, color: Colors.grey),
+            ),
+            const SizedBox(height: 20),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 40),
+              child: Text(
+                '进入测试页面后：\n'
+                '1. 尝试点击返回按钮\n'
+                '2. 尝试左滑返回\n'
+                '观察 onPopInvoked 是否被调用',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.grey, fontSize: 14),
               ),
-              const SizedBox(height: 40),
-              ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const PopScopeTestPage(),
-                    ),
-                  );
-                },
-                icon: const Icon(Icons.arrow_forward),
-                label: const Text('测试 PopScope'),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                ),
-              ),
-              const SizedBox(height: 20),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 40),
-                child: Text(
-                  '进入测试页面后：\n'
-                  '1. 尝试点击返回按钮\n'
-                  '2. 尝试左滑返回\n'
-                  '观察 onPopInvoked 是否被调用',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.grey, fontSize: 14),
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -196,7 +208,9 @@ class _PopScopeTestPageState extends State<PopScopeTestPage> {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false, // 阻止直接返回
-      onPopInvoked: _handlePopInvoked, // 监听返回事件
+      onPopInvokedWithResult: (didPop, _) {
+        _handlePopInvoked(didPop);
+      },
       child: Scaffold(
         appBar: AppBar(
           title: const Text('PopScope 测试页面'),
