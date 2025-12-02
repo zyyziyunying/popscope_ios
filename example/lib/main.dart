@@ -4,15 +4,27 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:popscope_ios/popscope_ios.dart';
 
-// 创建全局 Navigator Key
+/// 创建全局 Navigator Key
+/// 
+/// 这个 key 用于让插件能够访问 Flutter 的导航系统，
+/// 从而在检测到左滑返回手势时自动调用 maybePop()
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() {
   // 确保 Flutter 绑定已初始化
   WidgetsFlutterBinding.ensureInitialized();
   
-  // 设置 Navigator Key，启用自动导航处理
+  // 方法 1：设置 Navigator Key，启用自动导航处理
+  // 当检测到左滑返回手势时，插件会自动调用 Navigator.maybePop()
   PopscopeIos.setNavigatorKey(navigatorKey);
+  
+  // 方法 2：设置左滑返回手势回调（可选）
+  // 如果需要在返回时执行自定义逻辑，可以设置此回调
+  // 注意：如果同时设置了 setNavigatorKey，会先自动返回，然后再执行此回调
+  // PopscopeIos.setOnLeftBackGesture(() {
+  //   print('检测到左滑返回手势');
+  //   // 这里可以执行自定义逻辑
+  // });
   
   runApp(const MyApp());
 }
@@ -58,7 +70,13 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
-  // 设置系统返回手势监听
+  /// 设置系统返回手势监听
+  /// 
+  /// 这个方法演示了如何使用 setOnLeftBackGesture 来监听返回手势。
+  /// 在这个示例中，我们同时设置了 setNavigatorKey 和 setOnLeftBackGesture，
+  /// 所以执行顺序是：
+  /// 1. 插件自动调用 Navigator.maybePop()
+  /// 2. 执行这里设置的回调函数
   void setupBackGestureListener() {
     PopscopeIos.setOnLeftBackGesture(() {
       debugPrint('检测到系统返回手势！系统已自动调用 Navigator.maybePop()');
@@ -75,7 +93,9 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      navigatorKey: navigatorKey, // 设置 Navigator Key
+      // 重要：必须将 navigatorKey 关联到 MaterialApp
+      // 这样插件才能访问导航系统
+      navigatorKey: navigatorKey,
       home: Scaffold(
         appBar: AppBar(
           title: const Text('Popscope iOS Example'),

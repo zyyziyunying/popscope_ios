@@ -1,3 +1,11 @@
+## 1.0.0
+
+* 🎉 初始版本发布
+* ✨ 实现 iOS 左滑返回手势拦截功能
+* 🤖 支持自动处理页面返回（通过 `setNavigatorKey`）
+* 🔧 支持业务自定义处理逻辑（通过 `setOnLeftBackGesture`）
+* 📚 完善的文档和示例代码
+
 ## 0.0.1
 
-* TODO: Describe initial release.
+* 初始开发版本

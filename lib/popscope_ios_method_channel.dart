@@ -4,22 +4,24 @@ import 'package:flutter/services.dart';
 
 import 'popscope_ios_platform_interface.dart';
 
-/// An implementation of [PopscopeIosPlatform] that uses method channels.
+/// 使用 Method Channel 实现的 [PopscopeIosPlatform]
+/// 
+/// 该类负责与 iOS 原生端通信，接收左滑返回手势事件并处理。
 class MethodChannelPopscopeIos extends PopscopeIosPlatform {
-  /// The method channel used to interact with the native platform.
+  /// 用于与原生平台交互的 Method Channel
   @visibleForTesting
   final methodChannel = const MethodChannel('popscope_ios');
 
-  /// Callback for system back gesture
+  /// 系统返回手势的回调函数
   VoidCallback? _onSystemBackGesture;
   
-  /// Navigator key for automatic navigation handling
+  /// 用于自动导航处理的 Navigator Key
   GlobalKey<NavigatorState>? _navigatorKey;
   
-  /// Whether to automatically handle navigation
+  /// 是否自动处理导航
   bool _autoHandleNavigation = false;
   
-  /// Whether the method call handler has been set
+  /// Method Call Handler 是否已初始化
   bool _handlerInitialized = false;
 
   MethodChannelPopscopeIos() {
