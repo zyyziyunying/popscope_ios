@@ -51,6 +51,8 @@ public class PopscopeIosPlugin: NSObject, FlutterPlugin, UIGestureRecognizerDele
                     // 先将 window.rootViewController 设置为 nil，避免视图层次冲突
                     window.rootViewController = nil
                     let newNavController = UINavigationController(rootViewController: flutterVC)
+                    // 隐藏导航栏，避免占据上方空间
+                    newNavController.isNavigationBarHidden = true
                     self.navigationController = newNavController
                     // 再设置新的 NavigationController 为 rootViewController
                     window.rootViewController = newNavController
