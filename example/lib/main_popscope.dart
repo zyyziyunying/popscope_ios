@@ -17,7 +17,7 @@ void main() {
   // 确保 Flutter 绑定已初始化
   WidgetsFlutterBinding.ensureInitialized();
   
-  final plugin = PopscopeIos();
+  // final plugin = PopscopeIos();
   
   // // 设置 Navigator Key，启用自动导航处理
   // plugin.setNavigatorKey(navigatorKey);

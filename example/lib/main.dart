@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:popscope_ios/popscope_ios.dart';
 
 /// 创建全局 Navigator Key
-/// 
+///
 /// 这个 key 用于让插件能够访问 Flutter 的导航系统，
 /// 从而在检测到左滑返回手势时自动调用 maybePop()
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -13,11 +13,11 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 void main() {
   // 确保 Flutter 绑定已初始化
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // 方法 1：设置 Navigator Key，启用自动导航处理
   // 当检测到左滑返回手势时，插件会自动调用 Navigator.maybePop()
   PopscopeIos.setNavigatorKey(navigatorKey);
-  
+
   // 方法 2：设置左滑返回手势回调（可选）
   // 如果需要在返回时执行自定义逻辑，可以设置此回调
   // 注意：如果同时设置了 setNavigatorKey，会先自动返回，然后再执行此回调
@@ -25,7 +25,7 @@ void main() {
   //   print('检测到左滑返回手势');
   //   // 这里可以执行自定义逻辑
   // });
-  
+
   runApp(const MyApp());
 }
 
@@ -55,7 +55,8 @@ class _MyAppState extends State<MyApp> {
     // We also handle the message potentially returning null.
     try {
       platformVersion =
-          await _popscopeIosPlugin.getPlatformVersion() ?? 'Unknown platform version';
+          await _popscopeIosPlugin.getPlatformVersion() ??
+          'Unknown platform version';
     } on PlatformException {
       platformVersion = 'Failed to get platform version.';
     }
@@ -71,7 +72,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   /// 设置系统返回手势监听
-  /// 
+  ///
   /// 这个方法演示了如何使用 setOnLeftBackGesture 来监听返回手势。
   /// 在这个示例中，我们同时设置了 setNavigatorKey 和 setOnLeftBackGesture，
   /// 所以执行顺序是：
@@ -80,7 +81,7 @@ class _MyAppState extends State<MyApp> {
   void setupBackGestureListener() {
     PopscopeIos.setOnLeftBackGesture(() {
       debugPrint('检测到系统返回手势！系统已自动调用 Navigator.maybePop()');
-      
+
       // 更新计数（用于 UI 显示）
       if (mounted) {
         setState(() {
@@ -97,9 +98,7 @@ class _MyAppState extends State<MyApp> {
       // 这样插件才能访问导航系统
       navigatorKey: navigatorKey,
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Popscope iOS Example'),
-        ),
+        appBar: AppBar(title: const Text('Popscope iOS Example')),
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -108,16 +107,17 @@ class _MyAppState extends State<MyApp> {
               const SizedBox(height: 20),
               Text(
                 '返回手势触发次数: $_backGestureCount',
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 40),
               ElevatedButton(
                 onPressed: () {
                   Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const SecondPage(),
-                    ),
+                    navigatorKey.currentContext!,
+                    MaterialPageRoute(builder: (context) => const SecondPage()),
                   );
                 },
                 child: const Text('打开第二页'),
@@ -142,9 +142,7 @@ class SecondPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('第二页'),
-      ),
+      appBar: AppBar(title: const Text('第二页')),
       body: const Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

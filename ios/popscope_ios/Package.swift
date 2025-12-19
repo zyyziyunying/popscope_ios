@@ -6,7 +6,7 @@ import PackageDescription
 let package = Package(
     name: "popscope_ios",
     platforms: [
-        .iOS("12.0")
+        .iOS("13.0")
     ],
     products: [
         .library(name: "popscope-ios", targets: ["popscope_ios"])
