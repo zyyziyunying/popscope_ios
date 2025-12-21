@@ -124,58 +124,6 @@ class _BasicExamplePageState extends State<BasicExamplePage> {
               ),
             ),
             const SizedBox(height: 20),
-
-            // 导航按钮
-            ElevatedButton.icon(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const SecondPage()),
-                );
-              },
-              icon: const Icon(Icons.arrow_forward),
-              label: const Text('进入第二页测试'),
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// 第二页，用于测试返回功能
-class SecondPage extends StatelessWidget {
-  const SecondPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('第二页'), backgroundColor: Colors.green),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.check_circle, size: 80, color: Colors.green),
-            const SizedBox(height: 20),
-            const Text(
-              '尝试左滑返回',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-            const Text(
-              '系统会自动调用 Navigator.maybePop()',
-              style: TextStyle(fontSize: 14, color: Colors.grey),
-            ),
-            const SizedBox(height: 40),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text('点击返回'),
-            ),
           ],
         ),
       ),
