@@ -23,6 +23,9 @@ class MethodChannelPopscopeIos extends PopscopeIosPlatform {
   /// Method Call Handler 是否已初始化
   bool _handlerInitialized = false;
 
+  /// iOS 端手势拦截是否已启用
+  bool _iosGestureEnabled = false;
+
   MethodChannelPopscopeIos() {
     // 延迟设置 method call handler，避免在 binding 初始化前调用
     _ensureHandlerInitialized();
@@ -69,19 +72,40 @@ class MethodChannelPopscopeIos extends PopscopeIosPlatform {
   void setOnSystemBackGesture(VoidCallback? callback) {
     _ensureHandlerInitialized();
     _onSystemBackGesture = callback;
+    // 当设置回调时，启用 iOS 端的手势拦截
+    _enableIosGestureIfNeeded();
   }
   
   @override
-  void setNavigatorKey(GlobalKey<NavigatorState>? navigatorKey, {bool autoHandle = true}) {
+  void setNavigatorKey(
+    GlobalKey<NavigatorState>? navigatorKey, {
+    bool autoHandle = true,
+  }) {
     _ensureHandlerInitialized();
     _navigatorKey = navigatorKey;
     _autoHandleNavigation = autoHandle;
+    // 当设置 Navigator Key 时，启用 iOS 端的手势拦截
+    _enableIosGestureIfNeeded();
+  }
+
+  /// 如果需要，启用 iOS 端的手势拦截
+  ///
+  /// 只有在 Flutter 层主动调用 setNavigatorKey 或 setOnSystemBackGesture 时才会启用
+  void _enableIosGestureIfNeeded() {
+    if (!_iosGestureEnabled) {
+      try {
+        methodChannel.invokeMethod('enableInteractivePopGesture');
+        _iosGestureEnabled = true;
+      } catch (e) {}
+    }
   }
 
   @override
   Future<String?> getPlatformVersion() async {
     _ensureHandlerInitialized();
-    final version = await methodChannel.invokeMethod<String>('getPlatformVersion');
+    final version = await methodChannel.invokeMethod<String>(
+      'getPlatformVersion',
+    );
     return version;
   }
 }

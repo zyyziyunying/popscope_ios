@@ -21,11 +21,7 @@ public class PopscopeIosPlugin: NSObject, FlutterPlugin, UIGestureRecognizerDele
     let instance = PopscopeIosPlugin()
     instance.channel = channel
     registrar.addMethodCallDelegate(instance, channel: channel)
-    
-    // 延迟设置，确保 Flutter UI 已经初始化
-    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-      instance.setupInteractivePopGestureIfNeeded()
-    }
+    // ! 不再自动设置手势拦截，需要 Flutter 层主动调用 enableInteractivePopGesture 才会启用
   }
   
   /// 如果需要，设置左滑返回手势拦截
@@ -76,6 +72,12 @@ public class PopscopeIosPlugin: NSObject, FlutterPlugin, UIGestureRecognizerDele
     switch call.method {
     case "getPlatformVersion":
       result("iOS " + UIDevice.current.systemVersion)
+    case "enableInteractivePopGesture":
+      // Flutter 层主动调用此方法来启用手势拦截
+      DispatchQueue.main.async {
+        self.setupInteractivePopGestureIfNeeded()
+      }
+      result(nil)
     default:
       result(FlutterMethodNotImplemented)
     }
