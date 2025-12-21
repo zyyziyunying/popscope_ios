@@ -40,6 +40,20 @@ class _CallbackEntry {
       return false;
     }
   }
+
+  /// 检查该回调是否应该被清理
+  /// 只有当注册该回调的页面已经被销毁（context unmounted）时才返回 true
+  /// 如果页面只是被覆盖但还在路由栈中，不应该清理
+  bool shouldRemove() {
+    if (context == null) {
+      // 如果没有 context，无法判断，不清理（兼容旧版 API）
+      return false;
+    }
+
+    // 只有当 context 已经 unmounted 时才清理
+    // 如果 context 还 mounted，说明页面还在路由栈中，不应该清理
+    return !context!.mounted;
+  }
 }
 
 /// 使用 Method Channel 实现的 [PopscopeIosPlatform]
@@ -111,14 +125,16 @@ class MethodChannelPopscopeIos extends PopscopeIosPlatform {
         // 2. 调用用户自定义回调（无论是否自动处理）
         // 从栈顶开始查找，找到第一个有效的回调（注册该回调的页面还在顶层）
         VoidCallback? validCallback;
+        
+        // 先清理已销毁的回调（context unmounted）
+        _callbackStack.removeWhere((entry) => entry.shouldRemove());
+        
+        // 然后从栈顶开始查找有效的回调
         for (var i = _callbackStack.length - 1; i >= 0; i--) {
           final entry = _callbackStack[i];
           if (entry.shouldInvoke()) {
             validCallback = entry.callback;
             break;
-          } else {
-            // 如果页面已经不在顶层，自动清理该回调
-            _callbackStack.removeAt(i);
           }
         }
 
