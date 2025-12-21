@@ -14,42 +14,6 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 void main() {
   // 确保 Flutter 绑定已初始化
   WidgetsFlutterBinding.ensureInitialized();
-
-  // 设置 Navigator Key，但禁用自动处理
-  PopscopeIos.setNavigatorKey(navigatorKey, autoHandle: false);
-
-  // 自定义返回手势处理
-  PopscopeIos.setOnLeftBackGesture(() {
-    final context = navigatorKey.currentContext;
-    if (context != null && Navigator.of(context).canPop()) {
-      // 显示确认对话框
-      showDialog(
-        context: context,
-        builder: (BuildContext dialogContext) {
-          return AlertDialog(
-            title: const Text('确认返回'),
-            content: const Text('您确定要返回上一页吗？'),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(dialogContext).pop(); // 关闭对话框
-                },
-                child: const Text('取消'),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.of(dialogContext).pop(); // 关闭对话框
-                  Navigator.of(context).pop(); // 返回上一页
-                },
-                child: const Text('确认'),
-              ),
-            ],
-          );
-        },
-      );
-    }
-  });
-
   runApp(const MyApp());
 }
 
@@ -63,6 +27,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   String _platformVersion = 'Unknown';
   final _popscopeIosPlugin = PopscopeIos();
+  bool _gestureEnabled = false; // 手势启用状态
 
   @override
   void initState() {
@@ -85,6 +50,50 @@ class _MyAppState extends State<MyApp> {
     setState(() {
       _platformVersion = platformVersion;
     });
+  }
+
+  /// 切换手势启用状态
+  void _toggleGesture() {
+    setState(() {
+      _gestureEnabled = !_gestureEnabled;
+    });
+
+    if (_gestureEnabled) {
+      // 启用手势处理
+      PopscopeIos.setOnLeftBackGesture(() {
+        final context = navigatorKey.currentContext;
+        if (context != null && Navigator.of(context).canPop()) {
+          // 显示确认对话框
+          showDialog(
+            context: context,
+            builder: (BuildContext dialogContext) {
+              return AlertDialog(
+                title: const Text('确认返回'),
+                content: const Text('您确定要返回上一页吗？'),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(dialogContext).pop(); // 关闭对话框
+                    },
+                    child: const Text('取消'),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(dialogContext).pop(); // 关闭对话框
+                      Navigator.of(context).pop(); // 返回上一页
+                    },
+                    child: const Text('确认'),
+                  ),
+                ],
+              );
+            },
+          );
+        }
+      });
+    } else {
+      // 禁用手势处理
+      PopscopeIos.setOnLeftBackGesture(null);
+    }
   }
 
   @override
@@ -119,12 +128,25 @@ class _MyAppState extends State<MyApp> {
                     child: const Text('打开详情页'),
                   ),
                   const SizedBox(height: 20),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 40),
+                  ElevatedButton(
+                    onPressed: _toggleGesture,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _gestureEnabled ? Colors.green : Colors.grey,
+                    ),
                     child: Text(
-                      '在详情页尝试左滑返回\n将会弹出确认对话框',
+                      _gestureEnabled ? '禁用手势处理' : '启用手势处理',
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 40),
+                    child: Text(
+                      _gestureEnabled
+                          ? '手势处理已启用\n在详情页尝试左滑返回将会弹出确认对话框'
+                          : '手势处理已禁用\n在详情页左滑返回将使用系统默认行为',
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.grey, fontSize: 14),
+                      style: const TextStyle(color: Colors.grey, fontSize: 14),
                     ),
                   ),
                 ],

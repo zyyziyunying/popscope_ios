@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'popscope_ios_platform_interface.dart';
 
 /// 使用 Method Channel 实现的 [PopscopeIosPlatform]
-/// 
+///
 /// 该类负责与 iOS 原生端通信，接收左滑返回手势事件并处理。
 class MethodChannelPopscopeIos extends PopscopeIosPlatform {
   /// 用于与原生平台交互的 Method Channel
@@ -13,13 +13,13 @@ class MethodChannelPopscopeIos extends PopscopeIosPlatform {
 
   /// 系统返回手势的回调函数
   VoidCallback? _onSystemBackGesture;
-  
+
   /// 用于自动导航处理的 Navigator Key
   GlobalKey<NavigatorState>? _navigatorKey;
-  
+
   /// 是否自动处理导航
   bool _autoHandleNavigation = false;
-  
+
   /// Method Call Handler 是否已初始化
   bool _handlerInitialized = false;
 
@@ -30,7 +30,7 @@ class MethodChannelPopscopeIos extends PopscopeIosPlatform {
     // 延迟设置 method call handler，避免在 binding 初始化前调用
     _ensureHandlerInitialized();
   }
-  
+
   /// 确保 method call handler 已设置
   void _ensureHandlerInitialized() {
     if (!_handlerInitialized) {
@@ -39,7 +39,9 @@ class MethodChannelPopscopeIos extends PopscopeIosPlatform {
         _handlerInitialized = true;
       } catch (e) {
         // 如果 binding 还没初始化，稍后再试
-        debugPrint('PopscopeIos: Method call handler will be initialized later');
+        debugPrint(
+          'PopscopeIos: Method call handler will be initialized later',
+        );
       }
     }
   }
@@ -59,7 +61,7 @@ class MethodChannelPopscopeIos extends PopscopeIosPlatform {
             debugPrint('PopscopeIos: NavigatorState is null, cannot pop');
           }
         }
-        
+
         // 2. 调用用户自定义回调（无论是否自动处理）
         _onSystemBackGesture?.call();
         break;
@@ -75,7 +77,7 @@ class MethodChannelPopscopeIos extends PopscopeIosPlatform {
     // 当设置回调时，启用 iOS 端的手势拦截
     _enableIosGestureIfNeeded();
   }
-  
+
   @override
   void setNavigatorKey(
     GlobalKey<NavigatorState>? navigatorKey, {
@@ -96,7 +98,12 @@ class MethodChannelPopscopeIos extends PopscopeIosPlatform {
       try {
         methodChannel.invokeMethod('enableInteractivePopGesture');
         _iosGestureEnabled = true;
-      } catch (e) {}
+      } catch (e) {
+        throw PlatformException(
+          code: 'enableInteractivePopGestureError',
+          message: 'enableInteractivePopGesture error: $e',
+        );
+      }
     }
   }
 
