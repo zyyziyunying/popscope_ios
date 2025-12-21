@@ -3,6 +3,45 @@ import 'package:flutter/services.dart';
 
 import 'popscope_ios_platform_interface.dart';
 
+/// 回调条目，包含回调函数和唯一标识符
+class _CallbackEntry {
+  final Object token;
+  final VoidCallback callback;
+
+  /// 注册回调时的 BuildContext，用于检查页面是否还在顶层
+  final BuildContext? context;
+
+  _CallbackEntry(this.token, this.callback, this.context);
+
+  /// 检查该回调是否应该被调用
+  /// 只有当注册该回调的页面还在顶层时才返回 true
+  bool shouldInvoke() {
+    if (context == null) {
+      // 如果没有 context，默认允许调用（兼容旧版 API）
+      return true;
+    }
+
+    // 检查 context 是否还 mounted
+    if (!context!.mounted) {
+      return false;
+    }
+
+    // 检查该页面的 Route 是否还在顶层
+    try {
+      final route = ModalRoute.of(context!);
+      if (route == null) {
+        return false;
+      }
+
+      // 如果 route.isCurrent 为 true，说明该 route 是当前顶层 route
+      return route.isCurrent;
+    } catch (e) {
+      // 如果检查过程中出错，说明 context 已失效
+      return false;
+    }
+  }
+}
+
 /// 使用 Method Channel 实现的 [PopscopeIosPlatform]
 ///
 /// 该类负责与 iOS 原生端通信，接收左滑返回手势事件并处理。
@@ -11,8 +50,12 @@ class MethodChannelPopscopeIos extends PopscopeIosPlatform {
   @visibleForTesting
   final methodChannel = const MethodChannel('popscope_ios');
 
-  /// 系统返回手势的回调函数
+  /// 系统返回手势的回调函数（旧版 API，保持兼容）
   VoidCallback? _onSystemBackGesture;
+
+  /// 回调栈，用于管理多个页面的回调
+  /// 栈顶（最后一个）的回调会被调用
+  final List<_CallbackEntry> _callbackStack = [];
 
   /// 用于自动导航处理的 Navigator Key
   GlobalKey<NavigatorState>? _navigatorKey;
@@ -25,6 +68,9 @@ class MethodChannelPopscopeIos extends PopscopeIosPlatform {
 
   /// iOS 端手势拦截是否已启用
   bool _iosGestureEnabled = false;
+
+  /// 回调标识符计数器
+  int _tokenCounter = 0;
 
   MethodChannelPopscopeIos() {
     // 延迟设置 method call handler，避免在 binding 初始化前调用
@@ -63,7 +109,25 @@ class MethodChannelPopscopeIos extends PopscopeIosPlatform {
         }
 
         // 2. 调用用户自定义回调（无论是否自动处理）
-        _onSystemBackGesture?.call();
+        // 从栈顶开始查找，找到第一个有效的回调（注册该回调的页面还在顶层）
+        VoidCallback? validCallback;
+        for (var i = _callbackStack.length - 1; i >= 0; i--) {
+          final entry = _callbackStack[i];
+          if (entry.shouldInvoke()) {
+            validCallback = entry.callback;
+            break;
+          } else {
+            // 如果页面已经不在顶层，自动清理该回调
+            _callbackStack.removeAt(i);
+          }
+        }
+
+        if (validCallback != null) {
+          validCallback();
+        } else if (_onSystemBackGesture != null) {
+          // 兼容旧版 API
+          _onSystemBackGesture?.call();
+        }
         break;
       default:
         throw MissingPluginException('未实现的方法: ${call.method}');
@@ -75,7 +139,27 @@ class MethodChannelPopscopeIos extends PopscopeIosPlatform {
     _ensureHandlerInitialized();
     _onSystemBackGesture = callback;
     // 当设置回调时，启用 iOS 端的手势拦截
+    if (callback != null) {
+      _enableIosGestureIfNeeded();
+    }
+  }
+
+  @override
+  Object registerPopGestureCallback(
+    VoidCallback callback, [
+    BuildContext? context,
+  ]) {
+    _ensureHandlerInitialized();
+    final token = _tokenCounter++;
+    _callbackStack.add(_CallbackEntry(token, callback, context));
+    // 当注册回调时，启用 iOS 端的手势拦截
     _enableIosGestureIfNeeded();
+    return token;
+  }
+
+  @override
+  void unregisterPopGestureCallback(Object token) {
+    _callbackStack.removeWhere((entry) => entry.token == token);
   }
 
   @override

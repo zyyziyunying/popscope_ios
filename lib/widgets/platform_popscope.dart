@@ -24,7 +24,7 @@ class PlatformPopScope extends StatelessWidget {
   Widget build(BuildContext context) {
     /// iOS 平台且 canPop 为 false 时，使用手势拦截器
     if (Platform.isIOS && !canPop) {
-      return IosPopGestureInterceptor(onPopGesture: onPop, child: child);
+      return IosPopInterceptor(onPopGesture: onPop, child: child);
     }
 
     /// 其他情况使用标准 PopScope

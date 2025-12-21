@@ -10,8 +10,8 @@ import 'package:popscope_ios/popscope_ios.dart';
 ///
 /// 使用场景：当 PopScope.canPop 为 false 时，
 /// iOS 会完全禁用边缘滑动手势，此时可以使用此组件手动拦截手势并执行自定义逻辑
-class IosPopGestureInterceptor extends StatefulWidget {
-  const IosPopGestureInterceptor({
+class IosPopInterceptor extends StatefulWidget {
+  const IosPopInterceptor({
     super.key,
     required this.child,
     required this.onPopGesture,
@@ -25,28 +25,42 @@ class IosPopGestureInterceptor extends StatefulWidget {
   final VoidCallback onPopGesture;
 
   @override
-  State<IosPopGestureInterceptor> createState() =>
-      _IosPopGestureInterceptorState();
+  State<IosPopInterceptor> createState() =>
+      _IosPopInterceptorState();
 }
 
-class _IosPopGestureInterceptorState extends State<IosPopGestureInterceptor> {
+class _IosPopInterceptorState extends State<IosPopInterceptor> {
+  /// 回调标识符，用于注销回调
+  Object? _callbackToken;
+
+  /// 是否已经注册回调
+  bool _isRegistered = false;
+
   void _handlePopGesture() {
     widget.onPopGesture();
   }
 
   @override
-  void initState() {
-    super.initState();
-    if (Platform.isIOS) {
-      PopscopeIos.setOnLeftBackGesture(_handlePopGesture);
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (Platform.isIOS && !_isRegistered) {
+      /// 使用注册机制，支持多个页面同时使用，避免回调覆盖
+      /// 传递 context，确保只有顶层页面的回调会被调用
+      /// 在 didChangeDependencies 中注册，确保 context 已准备好
+      _callbackToken = PopscopeIos.registerPopGestureCallback(
+        _handlePopGesture,
+        context,
+      );
+      _isRegistered = true;
     }
   }
 
   @override
   void dispose() {
-    if (Platform.isIOS) {
-      /// 清除回调，避免内存泄漏
-      PopscopeIos.setOnLeftBackGesture(null);
+    if (Platform.isIOS && _callbackToken != null) {
+      /// 注销回调，避免内存泄漏
+      /// 使用 token 精确注销，不影响其他页面的回调
+      PopscopeIos.unregisterPopGestureCallback(_callbackToken!);
     }
     super.dispose();
   }

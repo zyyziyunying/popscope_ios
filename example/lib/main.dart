@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:popscope_ios/popscope_ios.dart';
-import 'package:popscope_ios_example/pages/basic_example_page.dart';
-import 'package:popscope_ios_example/pages/custom_gesture_page.dart';
-import 'package:popscope_ios_example/pages/popscope_example_page.dart';
-import 'package:popscope_ios_example/pages/platform_popscope_example_page.dart';
 
 /// 创建全局 Navigator Key
 ///
@@ -29,10 +25,7 @@ class MyApp extends StatelessWidget {
       // 这样插件才能访问导航系统
       navigatorKey: navigatorKey,
       title: 'Popscope iOS 示例',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        useMaterial3: true,
-      ),
+      theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: true),
       home: const HomePage(),
     );
   }
@@ -90,100 +83,17 @@ class _HomePageState extends State<HomePage> {
             const SizedBox(height: 20),
             const Text(
               '测试页面导航',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 10),
             Text(
               'Running on: $_platformVersion',
-              style: const TextStyle(
-                fontSize: 14,
-                color: Colors.grey,
-              ),
+              style: const TextStyle(fontSize: 14, color: Colors.grey),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 40),
-            
-            // PlatformPopScope 示例（推荐）
-            _buildExampleCard(
-              context: context,
-              title: 'PlatformPopScope（推荐）',
-              description: '自动处理初始化和销毁，推荐使用方式',
-              icon: Icons.star,
-              color: Colors.orange,
-              badge: '推荐',
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const PlatformPopScopeExamplePage(),
-                  ),
-                );
-              },
-            ),
-            
-            const SizedBox(height: 16),
-            
-            // 基础示例
-            _buildExampleCard(
-              context: context,
-              title: '基础示例',
-              description: '使用 setNavigatorKey 自动处理返回手势',
-              icon: Icons.settings,
-              color: Colors.blue,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const BasicExamplePage(),
-                  ),
-                );
-              },
-            ),
-            
-            const SizedBox(height: 16),
-            
-            // 自定义手势处理示例
-            _buildExampleCard(
-              context: context,
-              title: '自定义手势处理',
-              description: '通过按钮控制手势的启用/禁用，显示确认对话框',
-              icon: Icons.touch_app,
-              color: Colors.purple,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const CustomGesturePage(),
-                  ),
-                );
-              },
-            ),
-            
-            const SizedBox(height: 16),
-            
-            // PopScope 示例
-            _buildExampleCard(
-              context: context,
-              title: 'PopScope 示例',
-              description: '使用 PopScope widget 配合 onPopInvoked 控制返回行为',
-              icon: Icons.science,
-              color: Colors.green,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const PopScopeExamplePage(),
-                  ),
-                );
-              },
-            ),
-            
-            const SizedBox(height: 40),
-            
+
             // 说明卡片
             Card(
               color: Colors.grey.shade50,
@@ -217,92 +127,6 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildExampleCard({
-    required BuildContext context,
-    required String title,
-    required String description,
-    required IconData icon,
-    required Color color,
-    required VoidCallback onTap,
-    String? badge,
-  }) {
-    return Card(
-      elevation: 2,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(icon, color: color, size: 32),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            title,
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        if (badge != null)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.orange,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Text(
-                              badge,
-                              style: const TextStyle(
-                                fontSize: 10,
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      description,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey.shade600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(
-                Icons.arrow_forward_ios,
-                color: Colors.grey.shade400,
-                size: 20,
-              ),
-            ],
-          ),
         ),
       ),
     );
