@@ -48,7 +48,7 @@ class NestedExamplePage extends StatelessWidget {
                     const Text(
                       '本页面展示了多页面嵌套时页面级回调的管理。\n\n'
                       '• 页面A -> 页面B -> 页面C\n'
-                      '• B页面使用 registerPopGestureCallback 注册回调\n'
+                      '• B页面使用 PlatformPopScope 组件拦截返回手势\n'
                       '• C页面没有注册回调\n'
                       '• 在C页面触发手势时，不会调用B页面的回调\n'
                       '• 返回B页面后，B页面的回调才会生效\n'

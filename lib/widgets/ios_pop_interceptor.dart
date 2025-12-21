@@ -66,6 +66,18 @@ class _IosPopInterceptorState extends State<IosPopInterceptor> {
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(canPop: false, child: widget.child);
+    return PopScope(
+      canPop: false,
+      child: widget.child,
+      onPopInvokedWithResult: (didPop, result) {
+        /// 处理 Flutter 组件的返回操作（如 AppBar 返回按钮）
+        /// iOS 边缘滑动手势通过 registerPopGestureCallback 处理
+        /// 但 AppBar 返回按钮等 Flutter 组件的返回操作不会触发原生手势回调
+        /// 需要通过 onPopInvokedWithResult 来统一处理
+        if (!didPop) {
+          widget.onPopGesture();
+        }
+      },
+    );
   }
 }
