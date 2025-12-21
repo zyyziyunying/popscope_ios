@@ -37,10 +37,7 @@ abstract class PopscopeIosPlatform extends PlatformInterface {
   ///
   /// ⚠️ 注意：此方法会直接替换回调，多个页面使用时会有覆盖问题。
   /// 推荐使用 [registerPopGestureCallback] 和 [unregisterPopGestureCallback] 来管理回调。
-  @Deprecated(
-    '直接调用这个方法，会直接影响全局，多个页面使用时会有覆盖问题'
-    '请使用 registerPopGestureCallback 和 unregisterPopGestureCallback 来管理回调',
-  )
+ 
   void setOnSystemBackGesture(VoidCallback? callback) {
     throw UnimplementedError(
       'setOnSystemBackGesture() has not been implemented.',
@@ -95,10 +92,7 @@ abstract class PopscopeIosPlatform extends PlatformInterface {
   /// 参数：
   /// - [navigatorKey]: 全局 Navigator Key
   /// - [autoHandle]: 是否自动处理导航，默认为 true
-  @Deprecated(
-    '直接调用这个方法，会直接影响全局，并且不是很有必要'
-    '请使用 registerPopGestureCallback 和 unregisterPopGestureCallback 来管理回调',
-  )
+
   void setNavigatorKey(
     GlobalKey<NavigatorState>? navigatorKey, {
     bool autoHandle = true,

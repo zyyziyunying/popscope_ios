@@ -25,8 +25,7 @@ class IosPopInterceptor extends StatefulWidget {
   final VoidCallback onPopGesture;
 
   @override
-  State<IosPopInterceptor> createState() =>
-      _IosPopInterceptorState();
+  State<IosPopInterceptor> createState() => _IosPopInterceptorState();
 }
 
 class _IosPopInterceptorState extends State<IosPopInterceptor> {

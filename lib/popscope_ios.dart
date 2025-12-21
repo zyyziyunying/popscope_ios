@@ -57,6 +57,10 @@ class PopscopeIos {
   ///   }
   /// }
   /// ```
+  @Deprecated(
+    '直接调用这个方法，会直接影响全局，并且不是很有必要'
+    '请使用 registerPopGestureCallback 和 unregisterPopGestureCallback 来管理回调',
+  )
   static void setNavigatorKey(
     GlobalKey<NavigatorState>? navigatorKey, {
     bool autoHandle = true,
@@ -100,6 +104,10 @@ class PopscopeIos {
   ///   runApp(MyApp());
   /// }
   /// ```
+  @Deprecated(
+    '直接调用这个方法，会直接影响全局，多个页面使用时会有覆盖问题'
+    '请使用 registerPopGestureCallback 和 unregisterPopGestureCallback 来管理回调',
+  )
   static void setOnLeftBackGesture(VoidCallback? callback) {
     PopscopeIosPlatform.instance.setOnSystemBackGesture(callback);
   }
@@ -151,8 +159,14 @@ class PopscopeIos {
   ///   }
   /// }
   /// ```
-  static Object registerPopGestureCallback(VoidCallback callback, [BuildContext? context]) {
-    return PopscopeIosPlatform.instance.registerPopGestureCallback(callback, context);
+  static Object registerPopGestureCallback(
+    VoidCallback callback, [
+    BuildContext? context,
+  ]) {
+    return PopscopeIosPlatform.instance.registerPopGestureCallback(
+      callback,
+      context,
+    );
   }
 
   /// 注销左滑返回手势的回调函数
