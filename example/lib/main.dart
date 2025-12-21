@@ -6,6 +6,7 @@ import 'package:popscope_ios_example/pages/basic_example_page.dart';
 import 'package:popscope_ios_example/pages/custom_example_page.dart';
 import 'package:popscope_ios_example/pages/popscope_example_page.dart';
 import 'package:popscope_ios_example/pages/nested_example_page.dart';
+import 'package:popscope_ios_example/pages/bad_example_page.dart';
 
 /// 创建全局 Navigator Key
 ///
@@ -158,6 +159,22 @@ class _HomePageState extends State<HomePage> {
                 );
               },
             ),
+            const SizedBox(height: 16),
+            ExampleCard(
+              title: '负面示例：全局回调覆盖问题',
+              description: '展示使用已废弃的 setOnLeftBackGesture 方法会导致的问题',
+              icon: Icons.warning_amber_rounded,
+              color: Colors.red,
+              badge: '⚠️ 负面示例',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const BadExamplePage(),
+                  ),
+                );
+              },
+            ),
             const SizedBox(height: 20),
 
             // 说明卡片
@@ -189,7 +206,8 @@ class _HomePageState extends State<HomePage> {
                       '• 基础示例：最简单的自动处理方式\n'
                       '• 自定义处理：显示确认对话框\n'
                       '• PopScope 集成：与 Flutter 3.12+ 的 PopScope 集成\n'
-                      '• 多页面嵌套：验证回调栈管理机制',
+                      '• 多页面嵌套：验证回调栈管理机制\n'
+                      '• 负面示例：展示全局回调覆盖的问题',
                       style: TextStyle(fontSize: 14),
                     ),
                   ],

@@ -113,8 +113,6 @@ class MethodChannelPopscopeIos extends PopscopeIosPlatform {
   Future<dynamic> _handleMethodCall(MethodCall call) async {
     switch (call.method) {
       case 'onSystemBackGesture':
-        // 当接收到系统返回手势时
-        PopscopeLogger.debug('onSystemBackGesture pop');
         // 1. 如果设置了自动处理导航，尝试调用 maybePop()
         if (_autoHandleNavigation) {
           final navigator = _navigatorKey?.currentState;
@@ -161,6 +159,12 @@ class MethodChannelPopscopeIos extends PopscopeIosPlatform {
 
       // 如果找到了有效的回调，返回它
       if (entry.shouldInvoke()) {
+        final contextInfo = entry.context != null
+            ? 'context: ${entry.context.hashCode}'
+            : 'no context';
+        PopscopeLogger.debug(
+          'Callback invoked: token=${entry.token}, index=$i, $contextInfo',
+        );
         return entry.callback;
       }
     }
