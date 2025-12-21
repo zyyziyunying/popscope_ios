@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:popscope_ios/popscope_ios.dart';
+import 'package:popscope_ios_example/widgets/build_example_card.dart';
+import 'package:popscope_ios_example/pages/basic_example_page.dart';
+import 'package:popscope_ios_example/pages/custom_example_page.dart';
+import 'package:popscope_ios_example/pages/popscope_example_page.dart';
+import 'package:popscope_ios_example/pages/nested_example_page.dart';
 
 /// 创建全局 Navigator Key
 ///
@@ -11,6 +16,9 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 void main() {
   // 确保 Flutter 绑定已初始化
   WidgetsFlutterBinding.ensureInitialized();
+
+  // 设置 Navigator Key，启用自动处理
+  PopscopeIos.setNavigatorKey(navigatorKey);
 
   runApp(const MyApp());
 }
@@ -94,6 +102,70 @@ class _HomePageState extends State<HomePage> {
             ),
             const SizedBox(height: 40),
 
+            // 示例卡片列表
+            ExampleCard(
+              title: '基础示例',
+              description: '展示自动处理返回手势的基本用法',
+              icon: Icons.auto_awesome,
+              color: Colors.blue,
+              badge: '推荐',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const BasicExamplePage(),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 16),
+            ExampleCard(
+              title: '自定义处理示例',
+              description: '展示如何使用自定义回调处理返回手势',
+              icon: Icons.settings,
+              color: Colors.orange,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const CustomExamplePage(),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 16),
+            ExampleCard(
+              title: 'PopScope 集成示例',
+              description: '展示如何与 PopScope widget 集成',
+              icon: Icons.integration_instructions,
+              color: Colors.purple,
+              badge: 'Flutter 3.12+',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const PopscopeExamplePage(),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 16),
+            ExampleCard(
+              title: '多页面嵌套示例',
+              description: '展示多页面嵌套时回调栈的管理',
+              icon: Icons.layers,
+              color: Colors.teal,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const NestedExamplePage(),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 20),
+
             // 说明卡片
             Card(
               color: Colors.grey.shade50,
@@ -119,7 +191,11 @@ class _HomePageState extends State<HomePage> {
                     const SizedBox(height: 12),
                     const Text(
                       '点击上方任意示例卡片进入对应的测试页面，'
-                      '体验不同的返回手势处理方式。',
+                      '体验不同的返回手势处理方式。\n\n'
+                      '• 基础示例：最简单的自动处理方式\n'
+                      '• 自定义处理：显示确认对话框\n'
+                      '• PopScope 集成：与 Flutter 3.12+ 的 PopScope 集成\n'
+                      '• 多页面嵌套：验证回调栈管理机制',
                       style: TextStyle(fontSize: 14),
                     ),
                   ],
