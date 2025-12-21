@@ -49,6 +49,14 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "1.0.8"
+  cupertino_will_pop_scope:
+    dependency: "direct main"
+    description:
+      name: cupertino_will_pop_scope
+      sha256: d312103538bee026428d785cc3c06093b34c2793249229b1ddc49a1d8a43901f
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "1.2.1"
   fake_async:
     dependency: transitive
     description:

@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:popscope_ios/popscope_ios.dart';
+import 'package:cupertino_will_pop_scope/cupertino_will_pop_scope.dart';
 import 'package:popscope_ios_example/widgets/build_example_card.dart';
 import 'package:popscope_ios_example/pages/basic_example_page.dart';
 import 'package:popscope_ios_example/pages/custom_example_page.dart';
 import 'package:popscope_ios_example/pages/popscope_example_page.dart';
 import 'package:popscope_ios_example/pages/nested_example_page.dart';
 import 'package:popscope_ios_example/pages/bad_example_page.dart';
+import 'package:popscope_ios_example/pages/comparison_example_page.dart';
 
 /// 创建全局 Navigator Key
 ///
@@ -28,7 +30,17 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       navigatorKey: navigatorKey,
       title: 'Popscope iOS 示例',
-      theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: true),
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+        useMaterial3: true,
+        // ! 为了对比示例，配置 cupertino_will_pop_scope 的 pageTransitionsTheme
+        // 注意：popscope_ios 不需要此配置
+        pageTransitionsTheme: const PageTransitionsTheme(
+          builders: {
+            TargetPlatform.iOS: CupertinoWillPopScopePageTransionsBuilder(),
+          },
+        ),
+      ),
       home: const HomePage(),
     );
   }
@@ -175,6 +187,22 @@ class _HomePageState extends State<HomePage> {
                 );
               },
             ),
+            const SizedBox(height: 16),
+            ExampleCard(
+              title: '库对比示例',
+              description: '对比 popscope_ios 与 cupertino_will_pop_scope',
+              icon: Icons.compare_arrows,
+              color: Colors.purple,
+              badge: '⭐ 推荐',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ComparisonExamplePage(),
+                  ),
+                );
+              },
+            ),
             const SizedBox(height: 20),
 
             // 说明卡片
@@ -207,7 +235,8 @@ class _HomePageState extends State<HomePage> {
                       '• 自定义处理：显示确认对话框\n'
                       '• PopScope 集成：与 Flutter 3.12+ 的 PopScope 集成\n'
                       '• 多页面嵌套：验证回调栈管理机制\n'
-                      '• 负面示例：展示全局回调覆盖的问题',
+                      '• 负面示例：展示全局回调覆盖的问题\n'
+                      '• 库对比：对比 popscope_ios 与其他库的优势',
                       style: TextStyle(fontSize: 14),
                     ),
                   ],
