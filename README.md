@@ -12,12 +12,14 @@
 ## 为什么需要这个插件？
 
 在 Flutter iOS 应用中，iOS 的左滑手势（Interactive Pop Gesture）是独立于 Flutter Navigator 运行的原生手势。
-当这个手势被启动时，如果它发现 PopScope 设置了 canPop: false，它会简单地取消手势并停止，
-而不会向 Flutter 的 Navigator 发送一个明确的弹出（Pop）请求。因此，onPopInvokedWithResult 回调自然不会被触发到
-当使用 `UINavigationController` 时，系统默认的左滑返回手势（interactivePopGesture）会与 Flutter 的页面导航系统产生冲突。这个插件通过拦截系统手势，让你可以：
+当这个手势被启动时，如果它发现 `PopScope` 设置了 `canPop: false`，它会简单地取消手势并停止，
+而不会向 Flutter 的 Navigator 发送一个明确的弹出（Pop）请求。因此，`onPopInvokedWithResult` 回调不会被触发。
 
-1. **自动处理**：插件自动调用 Flutter 的 `Navigator.maybePop()`，实现页面返回
+这个插件通过拦截 iOS 系统的左滑返回手势（`interactivePopGesture`），让你可以：
+
+1. **自动处理**：插件自动调用 Flutter 的 `Navigator.maybePop()`，确保 `PopScope` 的 `onPopInvokedWithResult` 回调能够被正确触发
 2. **自定义处理**：在返回前执行自定义逻辑，如保存数据、显示确认对话框等
+3. **统一处理**：无论是点击返回按钮还是左滑手势，都能通过 `PopScope` 统一处理返回逻辑
 
 ## 安装
 
@@ -283,11 +285,16 @@ A: 不会。这个插件仅在 iOS 平台生效，Android 平台会忽略这些�
 
 ### Q: 如何禁用插件？
 
-A: 调用 `setNavigatorKey(null)` 和 `setOnLeftBackGesture(null)` 即可清除设置。
+A: 调用 `setNavigatorKey(null)` 和 `setOnLeftBackGesture(null)` 即可清除设置。清除后，即使 iOS 端的手势拦截仍然存在，也不会执行任何操作（因为没有回调或 Navigator Key）。
 
 ### Q: 插件如何工作的？
 
-A: 插件通过拦截 iOS 的 `UINavigationController.interactivePopGestureRecognizer` 手势识别器，在手势开始时阻止系统的默认行为，转而通知 Flutter 层处理。
+A: 插件的工作流程如下：
+1. 当你调用 `setNavigatorKey` 或 `setOnLeftBackGesture` 时，Flutter 层会自动调用 iOS 端的 `enableInteractivePopGesture` 方法
+2. iOS 端会创建或获取 `UINavigationController`，并设置自定义的 `UIGestureRecognizerDelegate`
+3. 当用户执行左滑手势时，iOS 端在 `gestureRecognizerShouldBegin` 中拦截手势，阻止系统默认行为
+4. 通过 Method Channel 发送 `onSystemBackGesture` 事件到 Flutter 层
+5. Flutter 层根据配置自动调用 `Navigator.maybePop()` 或执行自定义回调
 
 ## 技术实现
 
@@ -295,17 +302,23 @@ A: 插件通过拦截 iOS 的 `UINavigationController.interactivePopGestureRecog
 
 插件在 iOS 端通过以下步骤实现手势拦截：
 
-1. 自动创建或获取 `UINavigationController`
-2. 设置自定义的 `UIGestureRecognizerDelegate`
-3. 在 `gestureRecognizerShouldBegin` 中拦截左滑手势
-4. 通过 Method Channel 通知 Flutter 层
+1. **延迟初始化**：插件注册时不会自动启用手势拦截，需要 Flutter 层主动调用 `enableInteractivePopGesture` 方法
+2. **自动创建或获取 `UINavigationController`**：
+   - 如果 `rootViewController` 是 `UINavigationController`，直接使用
+   - 如果是 `FlutterViewController`，会创建新的 `UINavigationController` 并封装它（隐藏导航栏）
+3. **设置自定义的 `UIGestureRecognizerDelegate`**：保存原始代理，将自己设置为新的代理
+4. **拦截手势**：在 `gestureRecognizerShouldBegin` 中拦截左滑手势，阻止系统默认行为
+5. **通知 Flutter 层**：通过 Method Channel 发送 `onSystemBackGesture` 事件
 
 ### Flutter 端
 
-Flutter 端通过 Method Channel 接收手势事件，然后：
+Flutter 端的工作流程：
 
-1. 如果设置了 `navigatorKey` 且 `autoHandle` 为 true，自动调用 `Navigator.maybePop()`
-2. 如果设置了 `setOnLeftBackGesture` 回调，执行回调函数
+1. **自动启用 iOS 手势拦截**：当调用 `setNavigatorKey` 或 `setOnLeftBackGesture` 时，会自动调用 iOS 端的 `enableInteractivePopGesture` 方法来启用手势拦截
+2. **接收手势事件**：通过 Method Channel 监听 `onSystemBackGesture` 事件
+3. **处理返回逻辑**：
+   - 如果设置了 `navigatorKey` 且 `autoHandle` 为 true，自动调用 `Navigator.maybePop()`
+   - 如果设置了 `setOnLeftBackGesture` 回调，执行回调函数
 
 ## 兼容性
 
