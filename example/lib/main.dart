@@ -9,16 +9,12 @@ import 'package:popscope_ios_example/pages/nested_example_page.dart';
 
 /// 创建全局 Navigator Key
 ///
-/// 这个 key 用于让插件能够访问 Flutter 的导航系统，
-/// 从而在检测到左滑返回手势时自动调用 maybePop()
+/// 用于 MaterialApp 的 navigatorKey 参数，管理全局导航状态
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() {
   // 确保 Flutter 绑定已初始化
   WidgetsFlutterBinding.ensureInitialized();
-
-  // 设置 Navigator Key，启用自动处理
-  PopscopeIos.setNavigatorKey(navigatorKey);
 
   runApp(const MyApp());
 }
@@ -29,8 +25,6 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      // 重要：必须将 navigatorKey 关联到 MaterialApp
-      // 这样插件才能访问导航系统
       navigatorKey: navigatorKey,
       title: 'Popscope iOS 示例',
       theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: true),

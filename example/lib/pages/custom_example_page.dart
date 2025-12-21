@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:popscope_ios_example/widgets/step_item.dart';
 import 'package:popscope_ios/popscope_ios.dart';
 
 /// 自定义处理示例页面
@@ -17,21 +18,14 @@ class _CustomExamplePageState extends State<CustomExamplePage> {
   Object? _callbackToken;
 
   @override
-  void initState() {
-    super.initState();
-    _setupCustomCallback();
-  }
-
-  void _setupCustomCallback() {
-    /// 注册自定义回调
-    /// 注意：这里没有传递 context，所以会使用旧版 API 的行为
-    /// 在实际使用中，建议使用 IosPopInterceptor 组件
-    _callbackToken = PopscopeIos.registerPopGestureCallback(() {
-      setState(() {
-        _gestureCount++;
-      });
-      _showConfirmDialog();
-    });
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _callbackToken ??= PopscopeIos.registerPopGestureCallback(() {
+        setState(() {
+          _gestureCount++;
+        });
+        _showConfirmDialog();
+      }, context);
   }
 
   void _showConfirmDialog() {
@@ -159,10 +153,10 @@ class _CustomExamplePageState extends State<CustomExamplePage> {
               ),
             ),
             const SizedBox(height: 12),
-            _buildStepItem('1', '尝试从左边缘向右滑动'),
-            _buildStepItem('2', '会弹出确认对话框'),
-            _buildStepItem('3', '点击确认才会返回'),
-            _buildStepItem('4', '观察手势计数器的变化'),
+            const StepItem(number: '1', text: '尝试从左边缘向右滑动', color: Colors.orange),
+            const StepItem(number: '2', text: '会弹出确认对话框', color: Colors.orange),
+            const StepItem(number: '3', text: '点击确认才会返回', color: Colors.orange),
+            const StepItem(number: '4', text: '观察手势计数器的变化', color: Colors.orange),
             const SizedBox(height: 20),
 
             // 代码示例
@@ -191,7 +185,7 @@ class _CustomExamplePageState extends State<CustomExamplePage> {
                         'PopscopeIos.registerPopGestureCallback(() {\n'
                         '  // 显示确认对话框\n'
                         '  showDialog(...);\n'
-                        '});',
+                        '}, context);',
                         style: TextStyle(
                           fontFamily: 'monospace',
                           fontSize: 12,
@@ -208,40 +202,5 @@ class _CustomExamplePageState extends State<CustomExamplePage> {
     );
   }
 
-  Widget _buildStepItem(String number, String text) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 24,
-            height: 24,
-            decoration: BoxDecoration(
-              color: Colors.orange,
-              shape: BoxShape.circle,
-            ),
-            child: Center(
-              child: Text(
-                number,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: Text(text),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }
 

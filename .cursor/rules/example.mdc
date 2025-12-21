@@ -1,0 +1,81 @@
+---
+description: "When it is necessary to modify the example page, or to create a new example page"
+alwaysApply: false
+---
+
+## example架构
+
+```
+lib/
+├── main.dart                    # 应用入口，作为中转页面，统一管理所有测试页面的导航
+├── pages/                       # 存储各个测试页面
+│   ├── basic_example_page.dart          # 基础示例页面：展示自动处理返回手势
+│   ├── custom_example_page.dart         # 自定义处理示例页面：展示自定义回调处理
+│   ├── popscope_example_page.dart      # PopScope 集成示例页面：展示与 PopScope widget 集成
+│   └── nested_example_page.dart        # 多页面嵌套示例页面：展示回调栈管理机制
+├── widgets/                     # 存储可复用的 UI 组件
+│   └── build_example_card.dart          # 示例卡片组件：用于展示和导航到各个测试页面
+└── controllers/                 # 存储控制器，包含业务逻辑方法
+    └── (待添加控制器文件)
+```
+
+### 目录说明
+
+#### main.dart
+- **作用**：应用入口和中转页面
+- **职责**：
+  - 初始化插件（设置 Navigator Key）
+  - 提供统一的导航中心（HomePage）
+  - 展示所有测试页面的入口卡片
+  - 管理全局配置
+
+#### pages/
+- **作用**：存储各个独立的测试页面
+- **职责**：
+  - 每个页面展示一种特定的使用场景
+  - 包含完整的功能演示和说明
+  - 提供测试步骤和代码示例
+- **文件说明**：
+  - `basic_example_page.dart`: 基础用法，自动处理返回手势
+  - `custom_example_page.dart`: 自定义回调处理，显示确认对话框
+  - `popscope_example_page.dart`: 与 Flutter 3.12+ PopScope widget 集成
+  - `nested_example_page.dart`: 多页面嵌套场景，验证回调栈管理
+
+#### widgets/
+- **作用**：存储可复用的 UI 组件
+- **职责**：
+  - 提供通用的 UI 组件
+  - 保持代码复用和一致性
+- **文件说明**：
+  - `build_example_card.dart`: 示例卡片组件，用于在首页展示各个测试页面入口
+
+#### controllers/
+- **作用**：存储控制器，包含业务逻辑方法
+- **职责**：
+  - 封装业务逻辑
+  - 管理页面状态
+  - 提供可复用的方法
+- **使用场景**：
+  - 当多个页面需要共享相同的业务逻辑时
+  - 需要管理复杂状态时
+
+### 使用规范
+
+1. **添加新测试页面**：
+   - 在 `pages/` 目录下创建新的页面文件
+   - 在 `main.dart` 的 `HomePage` 中添加对应的 `ExampleCard`
+   - 确保页面包含完整的功能说明和测试步骤
+
+2. **添加新组件**：
+   - 在 `widgets/` 目录下创建组件文件
+   - 确保组件具有良好的可复用性
+   - 添加必要的文档注释
+
+3. **添加控制器**：
+   - 在 `controllers/` 目录下创建控制器文件
+   - 控制器应该包含相关的业务逻辑方法
+   - 可以在多个页面中复用
+
+4. **命名规范**：
+   - 页面文件：`*_example_page.dart` 或 `*_page.dart`
+   - 控制器文件：使用小写字母和下划线，如 `*_controller.dart`

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'popscope_ios_platform_interface.dart';
+import 'utils/logger.dart';
 
 // 导出 widgets，方便用户使用
 export 'widgets/platform_popscope.dart';
@@ -163,10 +164,14 @@ class PopscopeIos {
     VoidCallback callback, [
     BuildContext? context,
   ]) {
-    return PopscopeIosPlatform.instance.registerPopGestureCallback(
+    final token = PopscopeIosPlatform.instance.registerPopGestureCallback(
       callback,
       context,
     );
+    PopscopeLogger.info(
+      'registerPopGestureCallback token: $token, context: $context',
+    );
+    return token;
   }
 
   /// 注销左滑返回手势的回调函数
@@ -185,5 +190,6 @@ class PopscopeIos {
   /// ```
   static void unregisterPopGestureCallback(Object token) {
     PopscopeIosPlatform.instance.unregisterPopGestureCallback(token);
+    PopscopeLogger.info('unregisterPopGestureCallback token: $token');
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'popscope_ios_platform_interface.dart';
+import 'utils/logger.dart';
 
 /// 回调条目，包含回调函数和唯一标识符
 class _CallbackEntry {
@@ -49,10 +50,14 @@ class _CallbackEntry {
       // 如果没有 context，无法判断，不清理（兼容旧版 API）
       return false;
     }
+    final result = !context!.mounted;
 
+    if (result) {
+      PopscopeLogger.debug('CallbackEntry shouldRemove, context: $context');
+    }
     // 只有当 context 已经 unmounted 时才清理
     // 如果 context 还 mounted，说明页面还在路由栈中，不应该清理
-    return !context!.mounted;
+    return result;
   }
 }
 
@@ -99,9 +104,7 @@ class MethodChannelPopscopeIos extends PopscopeIosPlatform {
         _handlerInitialized = true;
       } catch (e) {
         // 如果 binding 还没初始化，稍后再试
-        debugPrint(
-          'PopscopeIos: Method call handler will be initialized later',
-        );
+        PopscopeLogger.warn('Method call handler will be initialized later');
       }
     }
   }
@@ -111,33 +114,19 @@ class MethodChannelPopscopeIos extends PopscopeIosPlatform {
     switch (call.method) {
       case 'onSystemBackGesture':
         // 当接收到系统返回手势时
-        debugPrint('PopscopeIos: onSystemBackGesture pop');
+        PopscopeLogger.debug('onSystemBackGesture pop');
         // 1. 如果设置了自动处理导航，尝试调用 maybePop()
         if (_autoHandleNavigation) {
           final navigator = _navigatorKey?.currentState;
           if (navigator != null) {
             await navigator.maybePop();
           } else {
-            debugPrint('PopscopeIos: NavigatorState is null, cannot pop');
+            PopscopeLogger.warn('NavigatorState is null, cannot pop');
           }
         }
 
         // 2. 调用用户自定义回调（无论是否自动处理）
-        // 从栈顶开始查找，找到第一个有效的回调（注册该回调的页面还在顶层）
-        VoidCallback? validCallback;
-        
-        // 先清理已销毁的回调（context unmounted）
-        _callbackStack.removeWhere((entry) => entry.shouldRemove());
-        
-        // 然后从栈顶开始查找有效的回调
-        for (var i = _callbackStack.length - 1; i >= 0; i--) {
-          final entry = _callbackStack[i];
-          if (entry.shouldInvoke()) {
-            validCallback = entry.callback;
-            break;
-          }
-        }
-
+        final validCallback = _findAndCleanValidCallback();
         if (validCallback != null) {
           validCallback();
         } else if (_onSystemBackGesture != null) {
@@ -148,6 +137,48 @@ class MethodChannelPopscopeIos extends PopscopeIosPlatform {
       default:
         throw MissingPluginException('未实现的方法: ${call.method}');
     }
+  }
+
+  /// 查找并清理有效的回调
+  ///
+  /// 从栈顶开始遍历回调栈，在查找过程中：
+  /// 1. 如果发现需要清理的条目（context unmounted），立即移除
+  /// 2. 如果找到有效的回调（页面还在顶层），返回该回调
+  ///
+  /// 返回：
+  /// - [VoidCallback?]: 找到的有效回调，如果没有找到则返回 null
+  VoidCallback? _findAndCleanValidCallback() {
+    // 从栈顶开始遍历，一边查找有效回调，一边清理已销毁的回调
+    for (var i = _callbackStack.length - 1; i >= 0; i--) {
+      final entry = _callbackStack[i];
+
+      // 如果该条目需要清理，立即移除
+      if (entry.shouldRemove()) {
+        _callbackStack.removeAt(i);
+        PopscopeLogger.debug('Removed callback entry at index $i');
+        continue;
+      }
+
+      // 如果找到了有效的回调，返回它
+      if (entry.shouldInvoke()) {
+        return entry.callback;
+      }
+    }
+
+    // 没有找到有效的回调
+    return null;
+  }
+
+  @override
+  void setNavigatorKey(
+    GlobalKey<NavigatorState>? navigatorKey, {
+    bool autoHandle = true,
+  }) {
+    _ensureHandlerInitialized();
+    _navigatorKey = navigatorKey;
+    _autoHandleNavigation = autoHandle;
+    // 当设置 Navigator Key 时，启用 iOS 端的手势拦截
+    _enableIosGestureIfNeeded();
   }
 
   @override
@@ -176,18 +207,6 @@ class MethodChannelPopscopeIos extends PopscopeIosPlatform {
   @override
   void unregisterPopGestureCallback(Object token) {
     _callbackStack.removeWhere((entry) => entry.token == token);
-  }
-
-  @override
-  void setNavigatorKey(
-    GlobalKey<NavigatorState>? navigatorKey, {
-    bool autoHandle = true,
-  }) {
-    _ensureHandlerInitialized();
-    _navigatorKey = navigatorKey;
-    _autoHandleNavigation = autoHandle;
-    // 当设置 Navigator Key 时，启用 iOS 端的手势拦截
-    _enableIosGestureIfNeeded();
   }
 
   /// 如果需要，启用 iOS 端的手势拦截

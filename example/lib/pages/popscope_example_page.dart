@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:popscope_ios_example/widgets/step_item.dart';
 import 'package:popscope_ios/widgets/platform_popscope.dart';
 
 /// PopScope 集成示例页面
@@ -141,10 +142,10 @@ class _PopscopeExamplePageState extends State<PopscopeExamplePage> {
                 ),
               ),
               const SizedBox(height: 12),
-              _buildStepItem('1', '尝试点击返回按钮'),
-              _buildStepItem('2', '尝试从左边缘向右滑动'),
-              _buildStepItem('3', '观察都会触发 onPopInvoked'),
-              _buildStepItem('4', '确认后才会真正返回'),
+              const StepItem(number: '1', text: '尝试点击返回按钮', color: Colors.purple),
+              const StepItem(number: '2', text: '尝试从左边缘向右滑动', color: Colors.purple),
+              const StepItem(number: '3', text: '观察都会触发 onPopInvoked', color: Colors.purple),
+              const StepItem(number: '4', text: '确认后才会真正返回', color: Colors.purple),
               const SizedBox(height: 20),
 
               // 代码示例
@@ -220,40 +221,5 @@ class _PopscopeExamplePageState extends State<PopscopeExamplePage> {
     );
   }
 
-  Widget _buildStepItem(String number, String text) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 24,
-            height: 24,
-            decoration: BoxDecoration(
-              color: Colors.purple,
-              shape: BoxShape.circle,
-            ),
-            child: Center(
-              child: Text(
-                number,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: Text(text),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:popscope_ios_example/widgets/step_item.dart';
 import 'package:popscope_ios/popscope_ios.dart';
 
 /// 多页面嵌套示例
@@ -44,12 +45,13 @@ class NestedExamplePage extends StatelessWidget {
                     ),
                     const SizedBox(height: 12),
                     const Text(
-                      '本页面展示了多页面嵌套时回调栈的管理。\n\n'
+                      '本页面展示了多页面嵌套时页面级回调的管理。\n\n'
                       '• 页面A -> 页面B -> 页面C\n'
-                      '• B页面注册了回调\n'
+                      '• B页面使用 registerPopGestureCallback 注册回调\n'
                       '• C页面没有注册回调\n'
                       '• 在C页面触发手势时，不会调用B页面的回调\n'
-                      '• 返回B页面后，B页面的回调才会生效',
+                      '• 返回B页面后，B页面的回调才会生效\n'
+                      '• 页面级回调，互不影响，避免全局覆盖问题',
                       style: TextStyle(fontSize: 14),
                     ),
                   ],
@@ -64,11 +66,11 @@ class NestedExamplePage extends StatelessWidget {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
-            _buildStepItem('1', '点击下方按钮进入页面B'),
-            _buildStepItem('2', '在页面B中进入页面C'),
-            _buildStepItem('3', '在页面C中尝试左滑返回'),
-            _buildStepItem('4', '观察：不会触发B页面的回调'),
-            _buildStepItem('5', '返回B页面后，B页面的回调才会生效'),
+            const StepItem(number: '1', text: '点击下方按钮进入页面B', color: Colors.teal),
+            const StepItem(number: '2', text: '在页面B中进入页面C', color: Colors.teal),
+            const StepItem(number: '3', text: '在页面C中尝试左滑返回', color: Colors.teal),
+            const StepItem(number: '4', text: '观察：不会触发B页面的回调', color: Colors.teal),
+            const StepItem(number: '5', text: '返回B页面后，B页面的回调才会生效', color: Colors.teal),
             const SizedBox(height: 20),
 
             // 导航按钮
@@ -92,41 +94,6 @@ class NestedExamplePage extends StatelessWidget {
     );
   }
 
-  Widget _buildStepItem(String number, String text) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 24,
-            height: 24,
-            decoration: BoxDecoration(
-              color: Colors.teal,
-              shape: BoxShape.circle,
-            ),
-            child: Center(
-              child: Text(
-                number,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: Text(text),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 /// 页面B：注册了回调
