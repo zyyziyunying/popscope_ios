@@ -2,14 +2,21 @@ import 'package:flutter/material.dart';
 
 import 'popscope_ios_platform_interface.dart';
 
+// 导出 widgets，方便用户使用
+export 'widgets/platform_popscope.dart';
+export 'widgets/ios_pop_interceptor.dart';
+
 /// iOS 左滑返回手势拦截插件
 ///
 /// 该插件用于拦截 iOS 系统的左滑返回手势（interactivePopGesture），
-/// 支持两种处理方式：
-/// 1. 自动处理：通过 [setNavigatorKey] 设置 Navigator，插件自动调用 maybePop()
-/// 2. 业务自定义：通过 [setOnLeftBackGesture] 设置回调，由业务层自行处理
+/// 支持三种使用方式：
+/// 1. **推荐**：使用 [PlatformPopScope] widget，自动处理初始化和销毁
+/// 2. 自动处理：通过 [setNavigatorKey] 设置 Navigator，插件自动调用 maybePop()
+/// 3. 业务自定义：通过 [setOnLeftBackGesture] 设置回调，由业务层自行处理
 ///
-/// 注意：两个方法至少需要设置一个才能使插件生效。
+/// **推荐使用 [PlatformPopScope] widget**，它会自动处理资源管理和跨平台兼容性。
+///
+/// 注意：如果使用方式 2 或 3，至少需要设置一个才能使插件生效。
 class PopscopeIos {
   Future<String?> getPlatformVersion() {
     return PopscopeIosPlatform.instance.getPlatformVersion();

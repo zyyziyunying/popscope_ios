@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'dart:async';
-
 import 'package:flutter/services.dart';
 import 'package:popscope_ios/popscope_ios.dart';
+import 'package:popscope_ios_example/pages/basic_example_page.dart';
+import 'package:popscope_ios_example/pages/custom_gesture_page.dart';
+import 'package:popscope_ios_example/pages/popscope_example_page.dart';
+import 'package:popscope_ios_example/pages/platform_popscope_example_page.dart';
 
 /// 创建全局 Navigator Key
 ///
@@ -14,45 +16,48 @@ void main() {
   // 确保 Flutter 绑定已初始化
   WidgetsFlutterBinding.ensureInitialized();
 
-  // 方法 1：设置 Navigator Key，启用自动导航处理
-  // 当检测到左滑返回手势时，插件会自动调用 Navigator.maybePop()
-  PopscopeIos.setNavigatorKey(navigatorKey);
-
-  // 方法 2：设置左滑返回手势回调（可选）
-  // 如果需要在返回时执行自定义逻辑，可以设置此回调
-  // 注意：如果同时设置了 setNavigatorKey，会先自动返回，然后再执行此回调
-  // PopscopeIos.setOnLeftBackGesture(() {
-  //   print('检测到左滑返回手势');
-  //   // 这里可以执行自定义逻辑
-  // });
-
   runApp(const MyApp());
 }
 
-class MyApp extends StatefulWidget {
+class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
-  State<MyApp> createState() => _MyAppState();
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      // 重要：必须将 navigatorKey 关联到 MaterialApp
+      // 这样插件才能访问导航系统
+      navigatorKey: navigatorKey,
+      title: 'Popscope iOS 示例',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+        useMaterial3: true,
+      ),
+      home: const HomePage(),
+    );
+  }
 }
 
-class _MyAppState extends State<MyApp> {
+/// 主页面：作为所有测试页面的导航中心
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
   String _platformVersion = 'Unknown';
-  int _backGestureCount = 0;
   final _popscopeIosPlugin = PopscopeIos();
 
   @override
   void initState() {
     super.initState();
     initPlatformState();
-    setupBackGestureListener();
   }
 
-  // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> initPlatformState() async {
     String platformVersion;
-    // Platform messages may fail, so we use a try/catch PlatformException.
-    // We also handle the message potentially returning null.
     try {
       platformVersion =
           await _popscopeIosPlugin.getPlatformVersion() ??
@@ -61,9 +66,6 @@ class _MyAppState extends State<MyApp> {
       platformVersion = 'Failed to get platform version.';
     }
 
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
     if (!mounted) return;
 
     setState(() {
@@ -71,95 +73,236 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
-  /// 设置系统返回手势监听
-  ///
-  /// 这个方法演示了如何使用 setOnLeftBackGesture 来监听返回手势。
-  /// 在这个示例中，我们同时设置了 setNavigatorKey 和 setOnLeftBackGesture，
-  /// 所以执行顺序是：
-  /// 1. 插件自动调用 Navigator.maybePop()
-  /// 2. 执行这里设置的回调函数
-  void setupBackGestureListener() {
-    PopscopeIos.setOnLeftBackGesture(() {
-      debugPrint('检测到系统返回手势！系统已自动调用 Navigator.maybePop()');
-
-      // 更新计数（用于 UI 显示）
-      if (mounted) {
-        setState(() {
-          _backGestureCount++;
-        });
-      }
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      // 重要：必须将 navigatorKey 关联到 MaterialApp
-      // 这样插件才能访问导航系统
-      navigatorKey: navigatorKey,
-      home: Scaffold(
-        appBar: AppBar(title: const Text('Popscope iOS Example')),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text('Running on: $_platformVersion\n'),
-              const SizedBox(height: 20),
-              Text(
-                '返回手势触发次数: $_backGestureCount',
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Popscope iOS 示例'),
+        backgroundColor: Colors.blue,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // 标题区域
+            const Icon(Icons.apps, size: 80, color: Colors.blue),
+            const SizedBox(height: 20),
+            const Text(
+              '测试页面导航',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'Running on: $_platformVersion',
+              style: const TextStyle(
+                fontSize: 14,
+                color: Colors.grey,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 40),
+            
+            // PlatformPopScope 示例（推荐）
+            _buildExampleCard(
+              context: context,
+              title: 'PlatformPopScope（推荐）',
+              description: '自动处理初始化和销毁，推荐使用方式',
+              icon: Icons.star,
+              color: Colors.orange,
+              badge: '推荐',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const PlatformPopScopeExamplePage(),
+                  ),
+                );
+              },
+            ),
+            
+            const SizedBox(height: 16),
+            
+            // 基础示例
+            _buildExampleCard(
+              context: context,
+              title: '基础示例',
+              description: '使用 setNavigatorKey 自动处理返回手势',
+              icon: Icons.settings,
+              color: Colors.blue,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const BasicExamplePage(),
+                  ),
+                );
+              },
+            ),
+            
+            const SizedBox(height: 16),
+            
+            // 自定义手势处理示例
+            _buildExampleCard(
+              context: context,
+              title: '自定义手势处理',
+              description: '通过按钮控制手势的启用/禁用，显示确认对话框',
+              icon: Icons.touch_app,
+              color: Colors.purple,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const CustomGesturePage(),
+                  ),
+                );
+              },
+            ),
+            
+            const SizedBox(height: 16),
+            
+            // PopScope 示例
+            _buildExampleCard(
+              context: context,
+              title: 'PopScope 示例',
+              description: '使用 PopScope widget 配合 onPopInvoked 控制返回行为',
+              icon: Icons.science,
+              color: Colors.green,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const PopScopeExamplePage(),
+                  ),
+                );
+              },
+            ),
+            
+            const SizedBox(height: 40),
+            
+            // 说明卡片
+            Card(
+              color: Colors.grey.shade50,
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.info_outline, color: Colors.blue.shade700),
+                        const SizedBox(width: 8),
+                        Text(
+                          '使用说明',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blue.shade700,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    const Text(
+                      '点击上方任意示例卡片进入对应的测试页面，'
+                      '体验不同的返回手势处理方式。',
+                      style: TextStyle(fontSize: 14),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 40),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    navigatorKey.currentContext!,
-                    MaterialPageRoute(builder: (context) => const SecondPage()),
-                  );
-                },
-                child: const Text('打开第二页'),
-              ),
-              const SizedBox(height: 20),
-              const Text(
-                '提示：在第二页尝试左滑返回\n系统会自动调用 Navigator.maybePop()',
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.grey),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
-}
 
-class SecondPage extends StatelessWidget {
-  const SecondPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('第二页')),
-      body: const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.swipe_left, size: 100, color: Colors.blue),
-            SizedBox(height: 20),
-            Text(
-              '尝试左滑返回',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 20),
-            Text(
-              '系统返回手势被拦截后\n会自动调用 Navigator.maybePop()',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey),
-            ),
-          ],
+  Widget _buildExampleCard({
+    required BuildContext context,
+    required String title,
+    required String description,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onTap,
+    String? badge,
+  }) {
+    return Card(
+      elevation: 2,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, color: color, size: 32),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            title,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        if (badge != null)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.orange,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              badge,
+                              style: const TextStyle(
+                                fontSize: 10,
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      description,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.arrow_forward_ios,
+                color: Colors.grey.shade400,
+                size: 20,
+              ),
+            ],
+          ),
         ),
       ),
     );

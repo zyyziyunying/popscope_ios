@@ -1,154 +1,12 @@
 import 'package:flutter/material.dart';
-import 'dart:async';
-
-import 'package:flutter/services.dart';
 import 'package:popscope_ios/popscope_ios.dart';
 
-// 创建全局 Navigator Key
-// final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-
-/// PopScope 示例：展示如何使用 PopScope(canPop: false) 配合 onPopInvoked
+/// 使用 PlatformPopScope 的测试页面
 /// 
-/// 这个示例展示了：
-/// 1. 使用 PopScope widget 控制返回行为
-/// 2. 监听 onPopInvoked 方法是否被调用
-/// 3. 配合 iOS 侧滑手势的拦截
-void main() {
-  // 确保 Flutter 绑定已初始化
-  WidgetsFlutterBinding.ensureInitialized();
-  
-  // final plugin = PopscopeIos();
-  
-  // // 设置 Navigator Key，启用自动导航处理
-  // plugin.setNavigatorKey(navigatorKey);
-  
-  // 添加自定义回调来记录事件（可选）
-  PopscopeIos.setOnLeftBackGesture(() {
-    debugPrint('🔙 iOS 侧滑手势被触发！系统已自动调用 Navigator.maybePop()');
-  });
-  
-  runApp(const MyApp());
-}
-
-class MyApp extends StatefulWidget {
-  const MyApp({super.key});
-
-  @override
-  State<MyApp> createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
-  String _platformVersion = 'Unknown';
-  final _popscopeIosPlugin = PopscopeIos();
-
-  @override
-  void initState() {
-    super.initState();
-    initPlatformState();
-  }
-
-  Future<void> initPlatformState() async {
-    String platformVersion;
-    try {
-      platformVersion =
-          await _popscopeIosPlugin.getPlatformVersion() ?? 'Unknown platform version';
-    } on PlatformException {
-      platformVersion = 'Failed to get platform version.';
-    }
-
-    if (!mounted) return;
-
-    setState(() {
-      _platformVersion = platformVersion;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      // navigatorKey: navigatorKey,
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        useMaterial3: true,
-      ),
-      home: HomePage(platformVersion: _platformVersion),
-    );
-  }
-}
-
-/// 首页 Widget
-class HomePage extends StatelessWidget {
-  final String platformVersion;
-
-  const HomePage({super.key, required this.platformVersion});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('PopScope 示例'),
-        backgroundColor: Colors.blue,
-      ),
-      body: PopScope(
-          canPop: false,
-          onPopInvokedWithResult: (value, _) {
-            if (!value) {
-              // do custom action
-              Navigator.pop(context);
-            }
-          },
-          child:
-      Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.science, size: 80, color: Colors.blue),
-            const SizedBox(height: 30),
-            const Text(
-              'PopScope Widget 测试',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              'Running on: $platformVersion',
-              style: const TextStyle(fontSize: 14, color: Colors.grey),
-            ),
-            const SizedBox(height: 40),
-            ElevatedButton.icon(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const PopScopeTestPage(),
-                  ),
-                );
-              },
-              icon: const Icon(Icons.arrow_forward),
-              label: const Text('测试 PopScope'),
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-              ),
-            ),
-            const SizedBox(height: 20),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 40),
-              child: Text(
-                '进入测试页面后：\n'
-                '1. 尝试点击返回按钮\n'
-                '2. 尝试左滑返回\n'
-                '观察 onPopInvoked 是否被调用',
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.grey, fontSize: 14),
-              ),
-            ),
-          ],
-        ),
-      )),
-    );
-  }
-}
-
-/// 使用 PopScope 的测试页面
+/// 推荐使用 PlatformPopScope，它会自动处理：
+/// - iOS 平台的手势拦截初始化
+/// - 组件销毁时的资源清理
+/// - 跨平台兼容性
 class PopScopeTestPage extends StatefulWidget {
   const PopScopeTestPage({super.key});
 
@@ -170,18 +28,16 @@ class _PopScopeTestPageState extends State<PopScopeTestPage> {
     });
   }
 
-  void _handlePopInvoked(bool didPop) {
-    _addLog('onPopInvoked 被调用 - didPop: $didPop');
+  void _handlePop() {
+    _addLog('onPop 被调用 - didPop: false');
     
     setState(() {
       _popInvokedCount++;
-      _lastPopType = didPop ? '已弹出' : '未弹出';
+      _lastPopType = '未弹出';
     });
 
-    // 如果没有弹出，显示确认对话框
-    if (!didPop) {
-      _showConfirmDialog();
-    }
+    // 显示确认对话框
+    _showConfirmDialog();
   }
 
   void _showConfirmDialog() {
@@ -215,11 +71,9 @@ class _PopScopeTestPageState extends State<PopScopeTestPage> {
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
+    return PlatformPopScope(
       canPop: false, // 阻止直接返回
-      onPopInvokedWithResult: (didPop, _) {
-        _handlePopInvoked(didPop);
-      },
+      onPop: _handlePop, // 当返回被阻止时调用
       child: Scaffold(
         appBar: AppBar(
           title: const Text('PopScope 测试页面'),
@@ -240,7 +94,7 @@ class _PopScopeTestPageState extends State<PopScopeTestPage> {
                       const Icon(Icons.analytics, size: 60, color: Colors.blue),
                       const SizedBox(height: 20),
                       const Text(
-                        'PopScope 状态',
+                        'PlatformPopScope 状态',
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -252,7 +106,7 @@ class _PopScopeTestPageState extends State<PopScopeTestPage> {
                       _buildStatusRow('canPop', 'false', Colors.red),
                       const SizedBox(height: 8),
                       _buildStatusRow(
-                        'onPopInvoked 调用次数',
+                        'onPop 调用次数',
                         '$_popInvokedCount',
                         Colors.green,
                       ),
@@ -292,8 +146,9 @@ class _PopScopeTestPageState extends State<PopScopeTestPage> {
                       const Text(
                         '1. 点击左上角的返回按钮\n'
                         '2. 使用 iOS 左滑返回手势\n'
-                        '3. 观察 onPopInvoked 是否被调用\n'
-                        '4. 查看日志了解详细信息',
+                        '3. 观察 onPop 是否被调用\n'
+                        '4. 查看日志了解详细信息\n'
+                        '5. PlatformPopScope 会自动处理资源管理',
                         style: TextStyle(fontSize: 14),
                       ),
                     ],
@@ -408,10 +263,11 @@ class _PopScopeTestPageState extends State<PopScopeTestPage> {
                       ),
                       const SizedBox(height: 12),
                       const Text(
-                        '✓ 点击返回按钮：触发 onPopInvoked(false)\n'
-                        '✓ iOS 左滑手势：被插件拦截，自动调用 maybePop()\n'
-                        '✓ maybePop() 检测到 canPop=false：触发 onPopInvoked(false)\n'
-                        '✓ 显示确认对话框，由用户决定是否返回',
+                        '✓ 点击返回按钮：触发 onPop()\n'
+                        '✓ iOS 左滑手势：PlatformPopScope 自动拦截\n'
+                        '✓ PlatformPopScope 检测到 canPop=false：触发 onPop()\n'
+                        '✓ 显示确认对话框，由用户决定是否返回\n'
+                        '✓ 组件销毁时自动清理资源，无需手动管理',
                         style: TextStyle(fontSize: 14),
                       ),
                     ],
