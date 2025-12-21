@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:popscope_ios_example/widgets/step_item.dart';
+import 'package:popscope_ios_example/widgets/confirm_pop_dialog.dart';
 import 'package:popscope_ios/popscope_ios.dart';
 
 /// 自定义处理示例页面
@@ -21,36 +22,11 @@ class _CustomExamplePageState extends State<CustomExamplePage> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _callbackToken ??= PopscopeIos.registerPopGestureCallback(() {
-        setState(() {
-          _gestureCount++;
-        });
-        _showConfirmDialog();
-      }, context);
-  }
-
-  void _showConfirmDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('确认返回'),
-        content: const Text('检测到左滑返回手势，是否确认返回？'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            child: const Text('取消'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context); // 关闭对话框
-              Navigator.pop(context); // 返回上一页
-            },
-            child: const Text('确认'),
-          ),
-        ],
-      ),
-    );
+      setState(() {
+        _gestureCount++;
+      });
+      ConfirmPopDialog.show(context);
+    }, context);
   }
 
   @override

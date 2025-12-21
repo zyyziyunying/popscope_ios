@@ -1,5 +1,4 @@
 import 'dart:developer' as developer;
-import 'package:flutter/foundation.dart';
 
 /// PopscopeIos 日志工具
 ///
@@ -23,15 +22,11 @@ class PopscopeLogger {
     'error': _red,
   };
 
-  // Main method to print the log with the appropriate color
   static void log(String level, String message) {
-    if (!kDebugMode) return; // Only log in debug mode
-
-    final color =
-        _logColors[level] ?? _reset; // Default to reset if no level is found
+    final color = _logColors[level] ?? _reset;
     final logMessage = '$color$level: $message$_reset';
 
-    developer.log(logMessage,name: _tag);
+    developer.log(logMessage, name: _tag);
   }
 
   // Convenience methods for each log level

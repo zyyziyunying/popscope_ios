@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:popscope_ios_example/widgets/step_item.dart';
-import 'package:popscope_ios/popscope_ios.dart';
+import 'package:popscope_ios_example/widgets/confirm_pop_dialog.dart';
+import 'package:popscope_ios/widgets/platform_popscope.dart';
 
 /// 多页面嵌套示例
 ///
@@ -96,108 +97,84 @@ class NestedExamplePage extends StatelessWidget {
 
 }
 
-/// 页面B：注册了回调
-class PageB extends StatefulWidget {
+/// 页面B：使用 PlatformPopScope 拦截返回手势
+class PageB extends StatelessWidget {
   const PageB({super.key});
 
-  @override
-  State<PageB> createState() => _PageBState();
-}
-
-class _PageBState extends State<PageB> {
-  int _gestureCount = 0;
-  Object? _callbackToken;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _callbackToken ??= PopscopeIos.registerPopGestureCallback(() {
-      setState(() {
-        _gestureCount++;
-      });
-      _showMessage('页面B的回调被触发！');
-    }, context);
-  }
-
-  void _showMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: Colors.blue),
-    );
-  }
-
-  @override
-  void dispose() {
-    if (_callbackToken != null) {
-      PopscopeIos.unregisterPopGestureCallback(_callbackToken!);
-    }
-    super.dispose();
+  void _handlePop(BuildContext context) {
+    ConfirmPopDialog.show(context);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('页面B（已注册回调）'),
-        backgroundColor: Colors.blue,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // 状态卡片
-            Card(
-              color: Colors.blue.shade50,
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  children: [
-                    const Icon(Icons.gesture, size: 48, color: Colors.blue),
-                    const SizedBox(height: 12),
-                    const Text(
-                      '本页面已注册回调',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+    return PlatformPopScope(
+      canPop: false,
+      onPop: () => _handlePop(context),
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('页面B（已注册回调）'),
+          backgroundColor: Colors.blue,
+        ),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // 状态卡片
+              Card(
+                color: Colors.blue.shade50,
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      const Icon(Icons.gesture, size: 48, color: Colors.blue),
+                      const SizedBox(height: 12),
+                      const Text(
+                        '本页面使用 PlatformPopScope',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      '手势触发次数: $_gestureCount',
-                      style: const TextStyle(fontSize: 16),
-                    ),
-                  ],
+                      const SizedBox(height: 8),
+                      const Text(
+                        'canPop: false',
+                        style: TextStyle(fontSize: 16),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 20),
+              const SizedBox(height: 20),
 
-            const Text(
-              '说明：',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              '• 本页面注册了回调，传递了 context\n'
-              '• 只有当本页面在顶层时，回调才会被调用\n'
-              '• 如果进入页面C，在C页面触发手势不会调用本页面的回调',
-            ),
-            const SizedBox(height: 20),
-
-            ElevatedButton.icon(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const PageC()),
-                );
-              },
-              icon: const Icon(Icons.arrow_forward),
-              label: const Text('进入页面C（无回调）'),
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16),
+              const Text(
+                '说明：',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
-            ),
-          ],
+              const SizedBox(height: 8),
+              const Text(
+                '• 本页面使用 PlatformPopScope，设置 canPop 为 false\n'
+                '• 当触发返回手势时，会显示确认对话框\n'
+                '• 只有当本页面在顶层时，回调才会被调用\n'
+                '• 如果进入页面C，在C页面触发手势不会调用本页面的回调',
+              ),
+              const SizedBox(height: 20),
+
+              ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const PageC()),
+                  );
+                },
+                icon: const Icon(Icons.arrow_forward),
+                label: const Text('进入页面C（无回调）'),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
