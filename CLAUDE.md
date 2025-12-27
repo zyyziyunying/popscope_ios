@@ -84,3 +84,15 @@ Located in `example/lib/`:
 - `widgets/` - Reusable UI components like `ExampleCard`
 
 When adding new example pages: create file in `pages/`, add `ExampleCard` in `main.dart`.
+
+## Git Commit Guidelines
+
+**IMPORTANT**: All git commit messages in this project MUST be written in Chinese (中文).
+
+- Commit message format: `<类型>: <描述>`
+- Common types: `特性`(feature), `修复`(bugfix), `文档`(docs), `重构`(refactor), `测试`(test), `样式`(style)
+- Example: `特性: 添加新的手势拦截功能`
+- Example: `修复: 解决内存泄漏问题`
+- Example: `文档: 更新 README 使用说明`
+
+This applies to all commits created by Claude Code when working on this project.
