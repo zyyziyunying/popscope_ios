@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:popscope_ios_example/widgets/step_item.dart';
-import 'package:popscope_ios_example/widgets/confirm_pop_dialog.dart';
 import 'package:popscope_ios_plus/popscope_ios.dart';
+import 'package:popscope_ios_plus_example/widgets/confirm_pop_dialog.dart';
+import 'package:popscope_ios_plus_example/widgets/step_item.dart';
 
 /// 自定义处理示例页面
 ///
@@ -102,10 +102,7 @@ class _CustomExamplePageState extends State<CustomExamplePage> {
                         children: [
                           const Text(
                             '手势触发次数',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey,
-                            ),
+                            style: TextStyle(fontSize: 14, color: Colors.grey),
                           ),
                           Text(
                             '$_gestureCount',
@@ -126,16 +123,21 @@ class _CustomExamplePageState extends State<CustomExamplePage> {
             // 测试说明
             const Text(
               '测试步骤：',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
-            const StepItem(number: '1', text: '尝试从左边缘向右滑动', color: Colors.orange),
+            const StepItem(
+              number: '1',
+              text: '尝试从左边缘向右滑动',
+              color: Colors.orange,
+            ),
             const StepItem(number: '2', text: '会弹出确认对话框', color: Colors.orange),
             const StepItem(number: '3', text: '点击确认才会返回', color: Colors.orange),
-            const StepItem(number: '4', text: '观察手势计数器的变化', color: Colors.orange),
+            const StepItem(
+              number: '4',
+              text: '观察手势计数器的变化',
+              color: Colors.orange,
+            ),
             const SizedBox(height: 20),
 
             // 代码示例
@@ -165,10 +167,7 @@ class _CustomExamplePageState extends State<CustomExamplePage> {
                         '  // 显示确认对话框\n'
                         '  showDialog(...);\n'
                         '}, context);',
-                        style: TextStyle(
-                          fontFamily: 'monospace',
-                          fontSize: 12,
-                        ),
+                        style: TextStyle(fontFamily: 'monospace', fontSize: 12),
                       ),
                     ),
                   ],
@@ -180,6 +179,4 @@ class _CustomExamplePageState extends State<CustomExamplePage> {
       ),
     );
   }
-
 }
-

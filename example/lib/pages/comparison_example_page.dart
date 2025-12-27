@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:popscope_ios_example/pages/compare/cupertino_will_pop_scope_example_page.dart';
-import 'package:popscope_ios_example/pages/compare/popscope_ios_example_page.dart';
+import 'package:popscope_ios_plus_example/pages/compare/cupertino_will_pop_scope_example_page.dart';
+import 'package:popscope_ios_plus_example/pages/compare/popscope_ios_example_page.dart';
 
 /// 对比示例页面
 ///

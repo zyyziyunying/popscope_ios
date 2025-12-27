@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:popscope_ios_example/widgets/step_item.dart';
+import 'package:popscope_ios_plus_example/widgets/step_item.dart';
 import 'package:popscope_ios_plus/widgets/platform_popscope.dart';
 
 /// PopScope 集成示例页面

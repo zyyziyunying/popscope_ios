@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:popscope_ios_example/widgets/step_item.dart';
-import 'package:popscope_ios_example/widgets/confirm_pop_dialog.dart';
 import 'package:popscope_ios_plus/widgets/platform_popscope.dart';
+import 'package:popscope_ios_plus_example/widgets/confirm_pop_dialog.dart';
+import 'package:popscope_ios_plus_example/widgets/step_item.dart';
 
 /// 多页面嵌套示例
 ///
@@ -67,11 +67,27 @@ class NestedExamplePage extends StatelessWidget {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
-            const StepItem(number: '1', text: '点击下方按钮进入页面B', color: Colors.teal),
+            const StepItem(
+              number: '1',
+              text: '点击下方按钮进入页面B',
+              color: Colors.teal,
+            ),
             const StepItem(number: '2', text: '在页面B中进入页面C', color: Colors.teal),
-            const StepItem(number: '3', text: '在页面C中尝试左滑返回', color: Colors.teal),
-            const StepItem(number: '4', text: '观察：不会触发B页面的回调', color: Colors.teal),
-            const StepItem(number: '5', text: '返回B页面后，B页面的回调才会生效', color: Colors.teal),
+            const StepItem(
+              number: '3',
+              text: '在页面C中尝试左滑返回',
+              color: Colors.teal,
+            ),
+            const StepItem(
+              number: '4',
+              text: '观察：不会触发B页面的回调',
+              color: Colors.teal,
+            ),
+            const StepItem(
+              number: '5',
+              text: '返回B页面后，B页面的回调才会生效',
+              color: Colors.teal,
+            ),
             const SizedBox(height: 20),
 
             // 导航按钮
@@ -94,7 +110,6 @@ class NestedExamplePage extends StatelessWidget {
       ),
     );
   }
-
 }
 
 /// 页面B：使用 PlatformPopScope 拦截返回手势
