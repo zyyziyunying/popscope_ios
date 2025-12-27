@@ -124,23 +124,26 @@ class MyPage extends StatefulWidget {
 }
 
 class _MyPageState extends State<MyPage> {
-  Object? _callbackToken;
+  bool _isRegistered = false;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // 注册回调，传入 context 确保只有当前页面在顶层时才触发
-    _callbackToken ??= PopscopeIos.registerPopGestureCallback(() {
-      // 处理返回手势
-      Navigator.maybePop(context);
-    }, context);
+    // 注册回调，传入 context 作为唯一标识，确保只有当前页面在顶层时才触发
+    if (!_isRegistered) {
+      PopscopeIos.registerPopGestureCallback(() {
+        // 处理返回手势
+        Navigator.maybePop(context);
+      }, context);
+      _isRegistered = true;
+    }
   }
 
   @override
   void dispose() {
-    // 注销回调，避免内存泄漏
-    if (_callbackToken != null) {
-      PopscopeIos.unregisterPopGestureCallback(_callbackToken!);
+    // 使用 context 注销回调，避免内存泄漏
+    if (_isRegistered) {
+      PopscopeIos.unregisterPopGestureCallback(context);
     }
     super.dispose();
   }
@@ -265,8 +268,8 @@ iOS 专用的边缘滑动手势拦截器。
 
 | 方法 | 说明 |
 |------|------|
-| `registerPopGestureCallback(callback, [context])` | 注册左滑返回手势回调，返回用于注销的 token |
-| `unregisterPopGestureCallback(token)` | 使用 token 注销回调 |
+| `registerPopGestureCallback(callback, context)` | 注册左滑返回手势回调，使用 context 作为唯一标识 |
+| `unregisterPopGestureCallback(context)` | 使用 context 注销回调 |
 
 ## 常见问题
 
