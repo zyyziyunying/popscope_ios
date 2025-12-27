@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.1] - 2025-12-28
+
+### Fixed
+- **Documentation**: Split README into English (primary) and Chinese versions for pub.dev compliance
+- **Description length**: Reduced pubspec.yaml description to 141 characters (within 60-180 requirement)
+- **Repository validation**: Ensured repository URL matches package name and default branch
+
+### Added
+- **README-ZH.md**: Chinese documentation with complete translations
+- **Git commit guidelines**: Added Chinese commit message standards in CLAUDE.md
+
+### Changed
+- **README.md**: Now in English as primary documentation, with link to Chinese version
+
 ## [0.1.0] - 2025-12-27
 
 ### Added
