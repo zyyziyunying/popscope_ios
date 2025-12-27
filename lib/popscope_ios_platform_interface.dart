@@ -51,25 +51,22 @@ abstract class PopscopeIosPlatform extends PlatformInterface {
   ///
   /// 参数：
   /// - [callback]: 手势触发时的回调函数
-  /// - [context]: 可选，注册回调时的 BuildContext，用于检查页面是否还在顶层
-  ///              如果提供，只有当该页面还在顶层时才会调用回调
-  ///
-  /// 返回：
-  /// - [Object]: 回调标识符，用于后续注销回调
+  /// - [context]: 注册回调时的 BuildContext，作为回调的唯一标识，
+  ///              同时用于检查页面是否还在顶层
   ///
   /// 示例：
   /// ```dart
-  /// final token = PopscopeIos.registerPopGestureCallback(() {
+  /// PopscopeIos.registerPopGestureCallback(() {
   ///   print('手势触发');
   /// }, context);
   ///
   /// // 组件销毁时注销
-  /// PopscopeIos.unregisterPopGestureCallback(token);
+  /// PopscopeIos.unregisterPopGestureCallback(context);
   /// ```
-  Object registerPopGestureCallback(
-    VoidCallback callback, [
-    BuildContext? context,
-  ]) {
+  void registerPopGestureCallback(
+    VoidCallback callback,
+    BuildContext context,
+  ) {
     throw UnimplementedError(
       'registerPopGestureCallback() has not been implemented.',
     );
@@ -78,8 +75,8 @@ abstract class PopscopeIosPlatform extends PlatformInterface {
   /// 注销系统返回手势的回调
   ///
   /// 参数：
-  /// - [token]: 注册回调时返回的标识符
-  void unregisterPopGestureCallback(Object token) {
+  /// - [context]: 注册回调时使用的 BuildContext
+  void unregisterPopGestureCallback(BuildContext context) {
     throw UnimplementedError(
       'unregisterPopGestureCallback() has not been implemented.',
     );

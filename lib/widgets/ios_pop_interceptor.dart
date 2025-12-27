@@ -29,9 +29,6 @@ class IosPopInterceptor extends StatefulWidget {
 }
 
 class _IosPopInterceptorState extends State<IosPopInterceptor> {
-  /// 回调标识符，用于注销回调
-  Object? _callbackToken;
-
   /// 是否已经注册回调
   bool _isRegistered = false;
 
@@ -44,22 +41,19 @@ class _IosPopInterceptorState extends State<IosPopInterceptor> {
     super.didChangeDependencies();
     if (Platform.isIOS && !_isRegistered) {
       /// 使用注册机制，支持多个页面同时使用，避免回调覆盖
-      /// 传递 context，确保只有顶层页面的回调会被调用
+      /// 传递 context 作为唯一标识，确保只有顶层页面的回调会被调用
       /// 在 didChangeDependencies 中注册，确保 context 已准备好
-      _callbackToken = PopscopeIos.registerPopGestureCallback(
-        _handlePopGesture,
-        context,
-      );
+      PopscopeIos.registerPopGestureCallback(_handlePopGesture, context);
       _isRegistered = true;
     }
   }
 
   @override
   void dispose() {
-    if (Platform.isIOS && _callbackToken != null) {
+    if (Platform.isIOS && _isRegistered) {
       /// 注销回调，避免内存泄漏
-      /// 使用 token 精确注销，不影响其他页面的回调
-      PopscopeIos.unregisterPopGestureCallback(_callbackToken!);
+      /// 使用 context 精确注销，不影响其他页面的回调
+      PopscopeIos.unregisterPopGestureCallback(context);
     }
     super.dispose();
   }

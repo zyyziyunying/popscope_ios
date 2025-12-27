@@ -120,11 +120,8 @@ class PopscopeIos {
   ///
   /// 参数：
   /// - [callback]: 手势触发时的回调函数
-  /// - [context]: 可选，注册回调时的 BuildContext，用于检查页面是否还在顶层
-  ///              如果提供，只有当该页面还在顶层时才会调用回调
-  ///
-  /// 返回：
-  /// - [Object]: 回调标识符，用于后续注销回调
+  /// - [context]: 注册回调时的 BuildContext，作为回调的唯一标识，
+  ///              同时用于检查页面是否还在顶层
   ///
   /// 使用场景：
   /// - 多个页面都需要拦截返回手势时，使用此方法可以避免回调覆盖
@@ -140,12 +137,10 @@ class PopscopeIos {
   /// }
   ///
   /// class _MyPageState extends State<MyPage> {
-  ///   Object? _callbackToken;
-  ///
   ///   @override
-  ///   void initState() {
-  ///     super.initState();
-  ///     _callbackToken = PopscopeIos.registerPopGestureCallback(() {
+  ///   void didChangeDependencies() {
+  ///     super.didChangeDependencies();
+  ///     PopscopeIos.registerPopGestureCallback(() {
   ///       print('检测到左滑返回手势');
   ///       // 处理返回逻辑
   ///     }, context);
@@ -153,43 +148,39 @@ class PopscopeIos {
   ///
   ///   @override
   ///   void dispose() {
-  ///     if (_callbackToken != null) {
-  ///       PopscopeIos.unregisterPopGestureCallback(_callbackToken!);
-  ///     }
+  ///     PopscopeIos.unregisterPopGestureCallback(context);
   ///     super.dispose();
   ///   }
   /// }
   /// ```
-  static Object registerPopGestureCallback(
-    VoidCallback callback, [
-    BuildContext? context,
-  ]) {
-    final token = PopscopeIosPlatform.instance.registerPopGestureCallback(
-      callback,
-      context,
-    );
+  static void registerPopGestureCallback(
+    VoidCallback callback,
+    BuildContext context,
+  ) {
+    PopscopeIosPlatform.instance.registerPopGestureCallback(callback, context);
     PopscopeLogger.info(
-      'registerPopGestureCallback token: $token, context: $context',
+      'registerPopGestureCallback context: ${context.hashCode}',
     );
-    return token;
   }
 
   /// 注销左滑返回手势的回调函数
   ///
   /// 参数：
-  /// - [token]: 注册回调时返回的标识符
+  /// - [context]: 注册回调时使用的 BuildContext
   ///
   /// 示例：
   /// ```dart
-  /// final token = PopscopeIos.registerPopGestureCallback(() {
+  /// PopscopeIos.registerPopGestureCallback(() {
   ///   print('手势触发');
-  /// });
+  /// }, context);
   ///
   /// // 组件销毁时注销
-  /// PopscopeIos.unregisterPopGestureCallback(token);
+  /// PopscopeIos.unregisterPopGestureCallback(context);
   /// ```
-  static void unregisterPopGestureCallback(Object token) {
-    PopscopeIosPlatform.instance.unregisterPopGestureCallback(token);
-    PopscopeLogger.info('unregisterPopGestureCallback token: $token');
+  static void unregisterPopGestureCallback(BuildContext context) {
+    PopscopeIosPlatform.instance.unregisterPopGestureCallback(context);
+    PopscopeLogger.info(
+      'unregisterPopGestureCallback context: ${context.hashCode}',
+    );
   }
 }

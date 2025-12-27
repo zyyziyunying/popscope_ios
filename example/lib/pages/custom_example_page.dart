@@ -16,23 +16,26 @@ class CustomExamplePage extends StatefulWidget {
 
 class _CustomExamplePageState extends State<CustomExamplePage> {
   int _gestureCount = 0;
-  Object? _callbackToken;
+  bool _isRegistered = false;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _callbackToken ??= PopscopeIos.registerPopGestureCallback(() {
-      setState(() {
-        _gestureCount++;
-      });
-      ConfirmPopDialog.show(context);
-    }, context);
+    if (!_isRegistered) {
+      PopscopeIos.registerPopGestureCallback(() {
+        setState(() {
+          _gestureCount++;
+        });
+        ConfirmPopDialog.show(context);
+      }, context);
+      _isRegistered = true;
+    }
   }
 
   @override
   void dispose() {
-    if (_callbackToken != null) {
-      PopscopeIos.unregisterPopGestureCallback(_callbackToken!);
+    if (_isRegistered) {
+      PopscopeIos.unregisterPopGestureCallback(context);
     }
     super.dispose();
   }

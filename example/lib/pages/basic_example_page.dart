@@ -14,21 +14,24 @@ class BasicExamplePage extends StatefulWidget {
 }
 
 class _BasicExamplePageState extends State<BasicExamplePage> {
-  Object? _callbackToken;
+  bool _isRegistered = false;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _callbackToken ??= PopscopeIos.registerPopGestureCallback(() {
-      Navigator.maybePop(context);
-    }, context);
+    if (!_isRegistered) {
+      PopscopeIos.registerPopGestureCallback(() {
+        Navigator.maybePop(context);
+      }, context);
+      _isRegistered = true;
+    }
   }
 
   @override
   void dispose() {
     /// 组件销毁时注销回调，避免内存泄漏
-    if (_callbackToken != null) {
-      PopscopeIos.unregisterPopGestureCallback(_callbackToken!);
+    if (_isRegistered) {
+      PopscopeIos.unregisterPopGestureCallback(context);
     }
     super.dispose();
   }

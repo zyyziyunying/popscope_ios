@@ -4,28 +4,24 @@ import 'package:flutter/services.dart';
 import 'popscope_ios_platform_interface.dart';
 import 'utils/logger.dart';
 
-/// 回调条目，包含回调函数和唯一标识符
+/// 回调条目，包含回调函数
 class _CallbackEntry {
-  final Object token;
   final VoidCallback callback;
 
   /// 注册回调时的 BuildContext，用于检查页面是否还在顶层
-  final BuildContext? context;
+  final BuildContext context;
 
-  _CallbackEntry(this.token, this.callback, this.context);
+  _CallbackEntry(this.callback, this.context);
 
   /// 检查该回调是否应该被调用
   /// 只有当注册该回调的页面还在顶层时才返回 true
   bool shouldInvoke() {
-    // 如果没有 context，默认允许调用（兼容旧版 API）
-    if (context == null) return true;
-
     // 检查 context 是否还 mounted
-    if (!context!.mounted) return false;
+    if (!context.mounted) return false;
 
     // 检查该页面的 Route 是否还在顶层
     // ModalRoute.of() 不会抛异常，只会返回 null
-    final route = ModalRoute.of(context!);
+    final route = ModalRoute.of(context);
     return route?.isCurrent ?? false;
   }
 
@@ -33,17 +29,10 @@ class _CallbackEntry {
   /// 只有当注册该回调的页面已经被销毁（context unmounted）时才返回 true
   /// 如果页面只是被覆盖但还在路由栈中，不应该清理
   bool shouldRemove() {
-    if (context == null) {
-      // 如果没有 context，无法判断，不清理（兼容旧版 API）
-      return false;
-    }
-    final result = !context!.mounted;
-
+    final result = !context.mounted;
     if (result) {
       PopscopeLogger.debug('CallbackEntry shouldRemove, context: $context');
     }
-    // 只有当 context 已经 unmounted 时才清理
-    // 如果 context 还 mounted，说明页面还在路由栈中，不应该清理
     return result;
   }
 }
@@ -59,9 +48,13 @@ class MethodChannelPopscopeIos extends PopscopeIosPlatform {
   /// 系统返回手势的回调函数（旧版 API，保持兼容）
   VoidCallback? _onSystemBackGesture;
 
-  /// 回调栈，用于管理多个页面的回调
-  /// 栈顶（最后一个）的回调会被调用
-  final List<_CallbackEntry> _callbackStack = [];
+  /// 回调存储，使用 Map 提升查找性能
+  /// key 是 BuildContext，value 是回调条目
+  final Map<BuildContext, _CallbackEntry> _callbackMap = {};
+
+  /// 回调顺序列表，用于维护栈的顺序（从栈底到栈顶）
+  /// 遍历时需要从后往前（从栈顶开始）
+  final List<BuildContext> _callbackOrder = [];
 
   /// 用于自动导航处理的 Navigator Key
   GlobalKey<NavigatorState>? _navigatorKey;
@@ -74,9 +67,6 @@ class MethodChannelPopscopeIos extends PopscopeIosPlatform {
 
   /// iOS 端手势拦截是否已启用
   bool _iosGestureEnabled = false;
-
-  /// 回调标识符计数器
-  int _tokenCounter = 0;
 
   MethodChannelPopscopeIos() {
     // 延迟设置 method call handler，避免在 binding 初始化前调用
@@ -134,23 +124,28 @@ class MethodChannelPopscopeIos extends PopscopeIosPlatform {
   /// - [VoidCallback?]: 找到的有效回调，如果没有找到则返回 null
   VoidCallback? _findAndCleanValidCallback() {
     // 从栈顶开始遍历，一边查找有效回调，一边清理已销毁的回调
-    for (var i = _callbackStack.length - 1; i >= 0; i--) {
-      final entry = _callbackStack[i];
+    for (var i = _callbackOrder.length - 1; i >= 0; i--) {
+      final context = _callbackOrder[i];
+      final entry = _callbackMap[context];
+
+      // 如果 entry 不存在（理论上不应该发生），清理顺序列表
+      if (entry == null) {
+        _callbackOrder.removeAt(i);
+        continue;
+      }
 
       // 如果该条目需要清理，立即移除
       if (entry.shouldRemove()) {
-        _callbackStack.removeAt(i);
+        _callbackMap.remove(context);
+        _callbackOrder.removeAt(i);
         PopscopeLogger.debug('Removed callback entry at index $i');
         continue;
       }
 
       // 如果找到了有效的回调，返回它
       if (entry.shouldInvoke()) {
-        final contextInfo = entry.context != null
-            ? 'context: ${entry.context.hashCode}'
-            : 'no context';
         PopscopeLogger.debug(
-          'Callback invoked: token=${entry.token}, index=$i, $contextInfo',
+          'Callback invoked: context=${context.hashCode}, index=$i',
         );
         return entry.callback;
       }
@@ -183,23 +178,40 @@ class MethodChannelPopscopeIos extends PopscopeIosPlatform {
   }
 
   @override
-  Object registerPopGestureCallback(
-    VoidCallback callback, [
-    BuildContext? context,
-  ]) {
+  void registerPopGestureCallback(
+    VoidCallback callback,
+    BuildContext context,
+  ) {
     _ensureHandlerInitialized();
-    final token = _tokenCounter++;
-    _callbackStack.add(_CallbackEntry(token, callback, context));
+
+    // 如果已经注册过，先移除旧的
+    if (_callbackMap.containsKey(context)) {
+      _callbackOrder.remove(context);
+    }
+
+    // 添加到 Map 和顺序列表
+    _callbackMap[context] = _CallbackEntry(callback, context);
+    _callbackOrder.add(context);
+
     // 当注册回调时，启用 iOS 端的手势拦截
     _enableIosGestureIfNeeded();
-    return token;
   }
 
   @override
-  void unregisterPopGestureCallback(Object token) {
-    _callbackStack.removeWhere(
-      (entry) => entry.token == token || entry.shouldRemove(),
-    );
+  void unregisterPopGestureCallback(BuildContext context) {
+    // O(1) 从 Map 删除
+    _callbackMap.remove(context);
+    // O(n) 从顺序列表删除，但可以顺便清理无效条目
+    _callbackOrder.removeWhere((ctx) {
+      if (ctx == context) return true;
+      // 顺便清理已 unmounted 的 context
+      final entry = _callbackMap[ctx];
+      if (entry != null && entry.shouldRemove()) {
+        _callbackMap.remove(ctx);
+        return true;
+      }
+      return false;
+    });
   }
 
   /// 如果需要，启用 iOS 端的手势拦截
@@ -211,7 +223,9 @@ class MethodChannelPopscopeIos extends PopscopeIosPlatform {
         methodChannel.invokeMethod('enableInteractivePopGesture');
         _iosGestureEnabled = true;
       } catch (e, stackTrace) {
-        PopscopeLogger.error('enableInteractivePopGesture failed: $e\n$stackTrace');
+        PopscopeLogger.error(
+          'enableInteractivePopGesture failed: $e\n$stackTrace',
+        );
         rethrow;
       }
     }

@@ -12,12 +12,10 @@ class PopscopeIosExamplePage extends StatefulWidget {
 }
 
 class _PopscopeIosExamplePageState extends State<PopscopeIosExamplePage> {
-  Object? _callbackToken;
-
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _callbackToken ??= PopscopeIos.registerPopGestureCallback(() {
+    PopscopeIos.registerPopGestureCallback(() {
       PopscopeLogger.info('popscope_ios: registerPopGestureCallback 被触发');
       showDialog(
         context: context,
@@ -44,9 +42,8 @@ class _PopscopeIosExamplePageState extends State<PopscopeIosExamplePage> {
 
   @override
   void dispose() {
-    if (_callbackToken != null) {
-      PopscopeIos.unregisterPopGestureCallback(_callbackToken!);
-    }
+    PopscopeIos.unregisterPopGestureCallback(context);
+
     super.dispose();
   }
 
