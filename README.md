@@ -2,24 +2,30 @@
 
 一个用于拦截和处理 iOS 系统左滑返回手势的 Flutter 插件。
 
+[![pub package](https://img.shields.io/pub/v/popscope_ios.svg)](https://pub.dev/packages/popscope_ios)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 ## 功能特性
 
-- 🎯 拦截 iOS 系统的左滑返回手势（interactivePopGesture）
-- 🤖 支持自动处理页面返回（通过 Navigator）
-- 🔧 支持业务自定义处理逻辑
-- 📦 轻量级，易于集成
+- 拦截 iOS 系统的左滑返回手势（interactivePopGesture）
+- 支持多页面同时注册回调，使用回调栈机制避免覆盖问题
+- 提供开箱即用的 Widget 组件（`PlatformPopScope`、`IosPopInterceptor`）
+- 自动处理生命周期和资源清理
+- 仅在 iOS 平台生效，对其他平台无影响
 
 ## 为什么需要这个插件？
 
-在 Flutter iOS 应用中，iOS 的左滑手势（Interactive Pop Gesture）是独立于 Flutter Navigator 运行的原生手势。
-当这个手势被启动时，如果它发现 `PopScope` 设置了 `canPop: false`，它会简单地取消手势并停止，
-而不会向 Flutter 的 Navigator 发送一个明确的弹出（Pop）请求。因此，`onPopInvokedWithResult` 回调不会被触发。
+在 Flutter 中，当使用 `PopScope`（或旧版的 `WillPopScope`）并设置 `canPop: false` 时，iOS 的边缘滑动返回手势会被完全禁用。这意味着：
 
-这个插件通过拦截 iOS 系统的左滑返回手势（`interactivePopGesture`），让你可以：
+1. 用户无法通过滑动手势触发任何回调
+2. 无法在用户滑动时显示确认对话框
+3. 无法执行自定义的返回逻辑
 
-1. **自动处理**：插件自动调用 Flutter 的 `Navigator.maybePop()`，确保 `PopScope` 的 `onPopInvokedWithResult` 回调能够被正确触发
-2. **自定义处理**：在返回前执行自定义逻辑，如保存数据、显示确认对话框等
-3. **统一处理**：无论是点击返回按钮还是左滑手势，都能通过 `PopScope` 统一处理返回逻辑
+`popscope_ios` 通过拦截 iOS 原生的 `interactivePopGestureRecognizer`，让你能够：
+
+- 在用户执行滑动返回手势时收到回调
+- 执行自定义逻辑（如显示确认对话框、保存数据等）
+- 决定是否允许页面返回
 
 ## 安装
 
@@ -38,112 +44,116 @@ flutter pub get
 
 ## 使用方法
 
-插件提供了两个主要方法，**至少需要设置其中一个**才能使插件生效：
+### 方式一：使用 PlatformPopScope（推荐）
 
-### 方法 1：setNavigatorKey - 自动处理页面返回
-
-如果你希望插件自动处理页面返回，无需业务层介入，使用此方法。
+`PlatformPopScope` 是一个跨平台的封装组件，会自动根据平台选择最佳实现：
 
 ```dart
-import 'package:flutter/material.dart';
 import 'package:popscope_ios/popscope_ios.dart';
 
-// 1. 创建全局 Navigator Key
-final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-
-void main() {
-  WidgetsFlutterBinding.ensureInitialized();
-  
-  // 2. 设置 Navigator Key，启用自动处理
-  PopscopeIos.setNavigatorKey(navigatorKey);
-  
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
+class MyPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      navigatorKey: navigatorKey, // 3. 关联到 MaterialApp
-      home: const HomePage(),
+    return PlatformPopScope(
+      canPop: false,
+      onPop: () {
+        // 显示确认对话框
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('确认退出？'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('取消'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context); // 关闭对话框
+                  Navigator.pop(context); // 返回上一页
+                },
+                child: const Text('确认'),
+              ),
+            ],
+          ),
+        );
+      },
+      child: Scaffold(
+        appBar: AppBar(title: const Text('我的页面')),
+        body: const Center(child: Text('尝试左滑返回')),
+      ),
     );
   }
 }
 ```
 
-**工作原理：**
-- 当用户执行左滑返回手势时，插件会自动调用 `Navigator.maybePop()`
-- 如果当前页面可以返回（不是根页面），则执行返回操作
-- 如果是根页面，则不做任何操作
+### 方式二：使用 IosPopInterceptor
 
-### 方法 2：setOnLeftBackGesture - 业务自定义处理
-
-如果你需要在返回前执行自定义逻辑，或者完全自定义返回行为，使用此方法。
+如果只需要在 iOS 上拦截手势，可以直接使用 `IosPopInterceptor`：
 
 ```dart
-import 'package:flutter/material.dart';
 import 'package:popscope_ios/popscope_ios.dart';
 
-void main() {
-  WidgetsFlutterBinding.ensureInitialized();
-  
-  // 设置左滑返回手势回调
-  PopscopeIos.setOnLeftBackGesture(() {
-    print('检测到左滑返回手势');
-    // 在这里执行自定义逻辑
-    // 例如：显示确认对话框、保存数据、统计等
-  });
-  
-  runApp(const MyApp());
-}
-```
-
-**注意：** 如果只设置 `setOnLeftBackGesture` 而不设置 `setNavigatorKey`，你需要在回调中自行处理页面返回逻辑。
-
-### 方法 3：两者结合使用
-
-你也可以同时使用两个方法，既享受自动返回的便利，又能执行自定义逻辑：
-
-```dart
-import 'package:flutter/material.dart';
-import 'package:popscope_ios/popscope_ios.dart';
-
-final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-
-void main() {
-  WidgetsFlutterBinding.ensureInitialized();
-  
-  // 1. 设置自动处理
-  PopscopeIos.setNavigatorKey(navigatorKey);
-  
-  // 2. 同时设置自定义回调
-  PopscopeIos.setOnLeftBackGesture(() {
-    print('返回手势触发，系统已自动调用 Navigator.maybePop()');
-    // 执行额外的逻辑，如统计、日志记录等
-  });
-  
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
+class MyPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      navigatorKey: navigatorKey,
-      home: const HomePage(),
+    return IosPopInterceptor(
+      onPopGesture: () {
+        // 处理返回手势
+        Navigator.maybePop(context);
+      },
+      child: Scaffold(
+        appBar: AppBar(title: const Text('我的页面')),
+        body: const Center(child: Text('尝试左滑返回')),
+      ),
     );
   }
 }
 ```
 
-**执行顺序：**
-1. 检测到左滑手势
-2. 插件自动调用 `Navigator.maybePop()`
-3. 执行 `setOnLeftBackGesture` 设置的回调函数
+### 方式三：手动注册回调
+
+如果需要更细粒度的控制，可以手动注册和注销回调：
+
+```dart
+import 'package:popscope_ios/popscope_ios.dart';
+
+class MyPage extends StatefulWidget {
+  @override
+  State<MyPage> createState() => _MyPageState();
+}
+
+class _MyPageState extends State<MyPage> {
+  Object? _callbackToken;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // 注册回调，传入 context 确保只有当前页面在顶层时才触发
+    _callbackToken ??= PopscopeIos.registerPopGestureCallback(() {
+      // 处理返回手势
+      Navigator.maybePop(context);
+    }, context);
+  }
+
+  @override
+  void dispose() {
+    // 注销回调，避免内存泄漏
+    if (_callbackToken != null) {
+      PopscopeIos.unregisterPopGestureCallback(_callbackToken!);
+    }
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('我的页面')),
+      body: const Center(child: Text('尝试左滑返回')),
+    );
+  }
+}
+```
 
 ## 完整示例
 
@@ -151,19 +161,7 @@ class MyApp extends StatelessWidget {
 import 'package:flutter/material.dart';
 import 'package:popscope_ios/popscope_ios.dart';
 
-final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-
 void main() {
-  WidgetsFlutterBinding.ensureInitialized();
-  
-  // 设置 Navigator Key，启用自动导航处理
-  PopscopeIos.setNavigatorKey(navigatorKey);
-  
-  // 设置返回手势监听
-  PopscopeIos.setOnLeftBackGesture(() {
-    print('检测到系统返回手势');
-  });
-  
   runApp(const MyApp());
 }
 
@@ -173,7 +171,6 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      navigatorKey: navigatorKey,
       home: const HomePage(),
     );
   }
@@ -185,39 +182,55 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('首页'),
-      ),
+      appBar: AppBar(title: const Text('首页')),
       body: Center(
         child: ElevatedButton(
           onPressed: () {
             Navigator.push(
               context,
-              MaterialPageRoute(
-                builder: (context) => const SecondPage(),
-              ),
+              MaterialPageRoute(builder: (_) => const DetailPage()),
             );
           },
-          child: const Text('打开第二页'),
+          child: const Text('进入详情页'),
         ),
       ),
     );
   }
 }
 
-class SecondPage extends StatelessWidget {
-  const SecondPage({super.key});
+class DetailPage extends StatelessWidget {
+  const DetailPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('第二页'),
-      ),
-      body: const Center(
-        child: Text(
-          '尝试左滑返回\n系统会自动调用 Navigator.maybePop()',
-          textAlign: TextAlign.center,
+    return PlatformPopScope(
+      canPop: false,
+      onPop: () async {
+        final shouldPop = await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('确认退出？'),
+            content: const Text('你确定要离开这个页面吗？'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('取消'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('确认'),
+              ),
+            ],
+          ),
+        );
+        if (shouldPop == true && context.mounted) {
+          Navigator.pop(context);
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(title: const Text('详情页')),
+        body: const Center(
+          child: Text('尝试左滑返回或点击返回按钮'),
         ),
       ),
     );
@@ -227,104 +240,93 @@ class SecondPage extends StatelessWidget {
 
 ## API 文档
 
-### setNavigatorKey
+### PlatformPopScope
 
-设置 Navigator Key，用于自动处理页面返回。
+跨平台的 PopScope 封装组件，自动处理 iOS 和其他平台的差异。
 
-```dart
-static void setNavigatorKey(
-  GlobalKey<NavigatorState>? navigatorKey, 
-  {bool autoHandle = true}
-)
-```
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `child` | `Widget` | 是 | 子组件 |
+| `canPop` | `bool` | 是 | 是否允许直接返回 |
+| `onPop` | `VoidCallback` | 是 | 当 `canPop` 为 `false` 时，用户尝试返回时的回调 |
 
-**参数：**
-- `navigatorKey`: 全局 Navigator Key，通常在 MaterialApp 中设置
-- `autoHandle`: 是否自动处理导航，默认为 `true`
+### IosPopInterceptor
 
-**使用场景：**
-- 希望插件自动处理页面返回，无需业务层介入
-- 需要与 Flutter 的导航系统集成
+iOS 专用的边缘滑动手势拦截器。
 
-### setOnLeftBackGesture
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `child` | `Widget` | 是 | 子组件 |
+| `onPopGesture` | `VoidCallback` | 是 | 左滑返回手势触发时的回调 |
 
-设置左滑返回手势的回调函数。
+### PopscopeIos
 
-```dart
-static void setOnLeftBackGesture(VoidCallback? callback)
-```
+静态 API 类，提供底层的回调注册和注销方法。
 
-**参数：**
-- `callback`: 手势触发时的回调函数，传入 `null` 可清除回调
-
-**使用场景：**
-- 需要在返回前执行自定义逻辑（如保存数据、显示确认对话框等）
-- 需要根据业务状态决定是否允许返回
-- 需要统计或记录用户的返回行为
-
-**注意：**
-- 如果同时设置了 `setNavigatorKey`，会先自动调用 `maybePop()`，然后再执行此回调
-- 如果只设置此回调而不设置 `setNavigatorKey`，则需要在回调中自行处理页面返回
+| 方法 | 说明 |
+|------|------|
+| `registerPopGestureCallback(callback, [context])` | 注册左滑返回手势回调，返回用于注销的 token |
+| `unregisterPopGestureCallback(token)` | 使用 token 注销回调 |
 
 ## 常见问题
 
-### Q: 必须同时设置两个方法吗？
-
-A: 不需要。至少设置其中一个即可：
-- 只设置 `setNavigatorKey`：插件自动处理页面返回
-- 只设置 `setOnLeftBackGesture`：业务自定义处理
-- 两者都设置：先自动返回，再执行自定义逻辑
-
-### Q: 为什么要在 main() 函数中调用这些方法？
-
-A: 为了确保在应用启动时就完成插件的初始化，这样可以在整个应用生命周期内拦截左滑手势。
-
 ### Q: 插件会影响 Android 平台吗？
 
-A: 不会。这个插件仅在 iOS 平台生效，Android 平台会忽略这些调用。
+A: 不会。这个插件仅在 iOS 平台生效，Android 平台会忽略这些调用。`PlatformPopScope` 在 Android 上会自动使用标准的 `PopScope`。
 
-### Q: 如何禁用插件？
+### Q: 如何在多个页面使用？
 
-A: 调用 `setNavigatorKey(null)` 和 `setOnLeftBackGesture(null)` 即可清除设置。清除后，即使 iOS 端的手势拦截仍然存在，也不会执行任何操作（因为没有回调或 Navigator Key）。
+A: 插件使用回调栈机制，支持多个页面同时注册回调。只有栈顶（最后注册且页面仍在顶层）的回调会被调用。组件销毁时会自动清理回调。
+
+### Q: 为什么推荐使用 Widget 方式？
+
+A: Widget 方式（`PlatformPopScope` 或 `IosPopInterceptor`）会自动处理：
+- 回调的注册和注销
+- 生命周期管理
+- 资源清理
+
+手动调用 API 需要自己管理这些，容易遗漏导致内存泄漏。
 
 ### Q: 插件如何工作的？
 
-A: 插件的工作流程如下：
-1. 当你调用 `setNavigatorKey` 或 `setOnLeftBackGesture` 时，Flutter 层会自动调用 iOS 端的 `enableInteractivePopGesture` 方法
-2. iOS 端会创建或获取 `UINavigationController`，并设置自定义的 `UIGestureRecognizerDelegate`
-3. 当用户执行左滑手势时，iOS 端在 `gestureRecognizerShouldBegin` 中拦截手势，阻止系统默认行为
-4. 通过 Method Channel 发送 `onSystemBackGesture` 事件到 Flutter 层
-5. Flutter 层根据配置自动调用 `Navigator.maybePop()` 或执行自定义回调
+A: 插件通过以下步骤拦截 iOS 左滑返回手势：
+
+1. 在 iOS 原生层，获取 `UINavigationController` 的 `interactivePopGestureRecognizer`
+2. 设置自己为手势识别器的代理（delegate）
+3. 在 `gestureRecognizerShouldBegin` 方法中拦截手势
+4. 通过 Method Channel 通知 Flutter 层
+5. Flutter 层调用注册的回调函数
+6. 返回 `false` 阻止系统默认的返回行为
 
 ## 技术实现
 
 ### iOS 端
 
-插件在 iOS 端通过以下步骤实现手势拦截：
-
-1. **延迟初始化**：插件注册时不会自动启用手势拦截，需要 Flutter 层主动调用 `enableInteractivePopGesture` 方法
-2. **自动创建或获取 `UINavigationController`**：
-   - 如果 `rootViewController` 是 `UINavigationController`，直接使用
-   - 如果是 `FlutterViewController`，会创建新的 `UINavigationController` 并封装它（隐藏导航栏）
-3. **设置自定义的 `UIGestureRecognizerDelegate`**：保存原始代理，将自己设置为新的代理
-4. **拦截手势**：在 `gestureRecognizerShouldBegin` 中拦截左滑手势，阻止系统默认行为
-5. **通知 Flutter 层**：通过 Method Channel 发送 `onSystemBackGesture` 事件
+- 拦截 `UINavigationController.interactivePopGestureRecognizer`
+- 实现 `UIGestureRecognizerDelegate` 协议
+- 在手势触发时通过 Method Channel 发送 `onSystemBackGesture` 事件
 
 ### Flutter 端
 
-Flutter 端的工作流程：
-
-1. **自动启用 iOS 手势拦截**：当调用 `setNavigatorKey` 或 `setOnLeftBackGesture` 时，会自动调用 iOS 端的 `enableInteractivePopGesture` 方法来启用手势拦截
-2. **接收手势事件**：通过 Method Channel 监听 `onSystemBackGesture` 事件
-3. **处理返回逻辑**：
-   - 如果设置了 `navigatorKey` 且 `autoHandle` 为 true，自动调用 `Navigator.maybePop()`
-   - 如果设置了 `setOnLeftBackGesture` 回调，执行回调函数
+- 维护回调栈，支持多页面注册
+- 回调条目包含 `BuildContext`，用于检查页面是否还在顶层
+- 只有有效的栈顶回调会被调用
+- 组件销毁时自动清理对应的回调
 
 ## 兼容性
 
-- Flutter: >=3.0.0
+- Flutter: >=3.3.0
 - iOS: >=12.0
 - Dart: >=3.0.0
+
+## 与 cupertino_will_pop_scope 的对比
+
+| 特性 | popscope_ios | cupertino_will_pop_scope |
+|------|--------------|-------------------------|
+| 多页面支持 | 回调栈机制，互不干扰 | 全局状态，可能冲突 |
+| 生命周期管理 | 自动清理 | 需手动管理 |
+| API 设计 | 注册/注销模式 | 全局设置模式 |
+| Widget 封装 | PlatformPopScope | CupertinoWillPopScope |
 
 ## 许可证
 
@@ -333,6 +335,8 @@ MIT License
 ## 贡献
 
 欢迎提交 Issue 和 Pull Request！
+
+GitHub: [https://github.com/WoodJim/popscope_ios](https://github.com/WoodJim/popscope_ios)
 
 ## 更新日志
 

@@ -17,29 +17,16 @@ class _CallbackEntry {
   /// 检查该回调是否应该被调用
   /// 只有当注册该回调的页面还在顶层时才返回 true
   bool shouldInvoke() {
-    if (context == null) {
-      // 如果没有 context，默认允许调用（兼容旧版 API）
-      return true;
-    }
+    // 如果没有 context，默认允许调用（兼容旧版 API）
+    if (context == null) return true;
 
     // 检查 context 是否还 mounted
-    if (!context!.mounted) {
-      return false;
-    }
+    if (!context!.mounted) return false;
 
     // 检查该页面的 Route 是否还在顶层
-    try {
-      final route = ModalRoute.of(context!);
-      if (route == null) {
-        return false;
-      }
-
-      // 如果 route.isCurrent 为 true，说明该 route 是当前顶层 route
-      return route.isCurrent;
-    } catch (e) {
-      // 如果检查过程中出错，说明 context 已失效
-      return false;
-    }
+    // ModalRoute.of() 不会抛异常，只会返回 null
+    final route = ModalRoute.of(context!);
+    return route?.isCurrent ?? false;
   }
 
   /// 检查该回调是否应该被清理
@@ -113,28 +100,28 @@ class MethodChannelPopscopeIos extends PopscopeIosPlatform {
   Future<dynamic> _handleMethodCall(MethodCall call) async {
     switch (call.method) {
       case 'onSystemBackGesture':
-        // 1. 如果设置了自动处理导航，尝试调用 maybePop()
-        if (_autoHandleNavigation) {
-          final navigator = _navigatorKey?.currentState;
-          if (navigator != null) {
-            await navigator.maybePop();
-          } else {
-            PopscopeLogger.warn('NavigatorState is null, cannot pop');
-          }
-        }
-
-        // 2. 调用用户自定义回调（无论是否自动处理）
-        final validCallback = _findAndCleanValidCallback();
-        if (validCallback != null) {
-          validCallback();
-        } else if (_onSystemBackGesture != null) {
-          // 兼容旧版 API
-          _onSystemBackGesture?.call();
-        }
+        await _handleSystemBackGesture();
         break;
       default:
         throw MissingPluginException('未实现的方法: ${call.method}');
     }
+  }
+
+  /// 处理系统返回手势事件
+  Future<void> _handleSystemBackGesture() async {
+    // 1. 如果设置了自动处理导航，尝试调用 maybePop()
+    if (_autoHandleNavigation) {
+      final navigator = _navigatorKey?.currentState;
+      if (navigator != null) {
+        await navigator.maybePop();
+      } else {
+        PopscopeLogger.warn('NavigatorState is null, cannot pop');
+      }
+    }
+
+    // 2. 调用用户自定义回调（无论是否自动处理）
+    final callback = _findAndCleanValidCallback() ?? _onSystemBackGesture;
+    callback?.call();
   }
 
   /// 查找并清理有效的回调
@@ -210,7 +197,9 @@ class MethodChannelPopscopeIos extends PopscopeIosPlatform {
 
   @override
   void unregisterPopGestureCallback(Object token) {
-    _callbackStack.removeWhere((entry) => entry.token == token);
+    _callbackStack.removeWhere(
+      (entry) => entry.token == token || entry.shouldRemove(),
+    );
   }
 
   /// 如果需要，启用 iOS 端的手势拦截
@@ -221,11 +210,9 @@ class MethodChannelPopscopeIos extends PopscopeIosPlatform {
       try {
         methodChannel.invokeMethod('enableInteractivePopGesture');
         _iosGestureEnabled = true;
-      } catch (e) {
-        throw PlatformException(
-          code: 'enableInteractivePopGestureError',
-          message: 'enableInteractivePopGesture error: $e',
-        );
+      } catch (e, stackTrace) {
+        PopscopeLogger.error('enableInteractivePopGesture failed: $e\n$stackTrace');
+        rethrow;
       }
     }
   }
