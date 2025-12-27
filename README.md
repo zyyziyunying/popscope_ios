@@ -1,70 +1,72 @@
 # popscope_ios_plus
 
-一个用于拦截和处理 iOS 系统左滑返回手势的增强版 Flutter 插件。
+An enhanced Flutter plugin for intercepting and handling iOS left-edge swipe back gestures.
 
 [![pub package](https://img.shields.io/pub/v/popscope_ios_plus.svg)](https://pub.dev/packages/popscope_ios_plus)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-> **注意**：这是 [popscope_ios](https://pub.dev/packages/popscope_ios) 的增强版本 (Plus)，提供了更好的性能、更完善的文档和更安全的 API 设计。
+[中文文档](README-ZH.md) | English
 
-## ✨ 相比原版的改进
+> **Note**: This is an enhanced version (Plus) of [popscope_ios](https://pub.dev/packages/popscope_ios), offering better performance, comprehensive documentation, and safer API design.
 
-| 特性 | popscope_ios | popscope_ios_plus |
-|------|--------------|-------------------|
-| **回调管理** | Token 基础 | Context 基础 ✅ |
-| **性能** | O(n) 操作 | O(1) 操作 ✅ |
-| **自动清理** | 仅手动 | 自动 + 手动 ✅ |
-| **多页面支持** | 全局回调 | 页面级回调 ✅ |
-| **文档** | 基础 | 详尽 ✅ |
-| **最佳实践指南** | 无 | 有 ✅ |
-| **运行时验证** | 无 | 有 ✅ |
+## ✨ Improvements Over Original
 
-## 功能特性
+| Feature | popscope_ios | popscope_ios_plus |
+|---------|-------------|-------------------|
+| **Callback Management** | Token-based | Context-based ✅ |
+| **Performance** | O(n) operations | O(1) operations ✅ |
+| **Auto Cleanup** | Manual only | Auto + Manual ✅ |
+| **Multi-page Support** | Global callback | Per-page callbacks ✅ |
+| **Documentation** | Basic | Comprehensive ✅ |
+| **Best Practices Guide** | No | Yes ✅ |
+| **Runtime Validation** | No | Yes ✅ |
 
-- ✅ 拦截 iOS 系统的左滑返回手势（interactivePopGesture）
-- ✅ 使用 `BuildContext` 作为标识的页面级回调系统
-- ✅ 自动清理已销毁页面的回调，防止内存泄漏
-- ✅ O(1) 性能的回调查找和删除
-- ✅ 提供开箱即用的 Widget 组件（`PlatformPopScope`、`IosPopInterceptor`）
-- ✅ 自动处理生命周期和资源清理
-- ✅ 运行时验证和开发模式断言
-- ✅ 详细的最佳实践文档和错误示例
-- ✅ 仅在 iOS 平台生效，对其他平台无影响
+## Features
 
-## 为什么需要这个插件？
+- ✅ Intercepts iOS system left-edge swipe back gesture (interactivePopGesture)
+- ✅ Per-page callback system using `BuildContext` as identifier
+- ✅ Auto cleanup for destroyed pages to prevent memory leaks
+- ✅ O(1) performance for callback lookup and removal
+- ✅ Ready-to-use Widget components (`PlatformPopScope`, `IosPopInterceptor`)
+- ✅ Automatic lifecycle and resource cleanup
+- ✅ Runtime validation and development mode assertions
+- ✅ Detailed best practices documentation with anti-patterns
+- ✅ iOS-only, no impact on other platforms
 
-在 Flutter 中，当使用 `PopScope`（或旧版的 `WillPopScope`）并设置 `canPop: false` 时，iOS 的边缘滑动返回手势会被完全禁用。这意味着：
+## Why This Plugin?
 
-1. 用户无法通过滑动手势触发任何回调
-2. 无法在用户滑动时显示确认对话框
-3. 无法执行自定义的返回逻辑
+In Flutter, when using `PopScope` (or legacy `WillPopScope`) with `canPop: false`, iOS's edge swipe back gesture gets completely disabled. This means:
 
-`popscope_ios_plus` 通过拦截 iOS 原生的 `interactivePopGestureRecognizer`，让你能够：
+1. Users cannot trigger any callbacks via swipe gestures
+2. You cannot show confirmation dialogs when users swipe
+3. You cannot execute custom back logic
 
-- 在用户执行滑动返回手势时收到回调
-- 执行自定义逻辑（如显示确认对话框、保存数据等）
-- 决定是否允许页面返回
+`popscope_ios_plus` solves this by intercepting iOS native `interactivePopGestureRecognizer`, allowing you to:
 
-## 安装
+- Receive callbacks when users perform swipe back gestures
+- Execute custom logic (show dialogs, save data, etc.)
+- Decide whether to allow page navigation
 
-在 `pubspec.yaml` 中添加依赖：
+## Installation
+
+Add to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
   popscope_ios_plus: ^0.1.0
 ```
 
-然后运行：
+Then run:
 
 ```bash
 flutter pub get
 ```
 
-## 使用方法
+## Usage
 
-### 方式一：使用 PlatformPopScope（推荐）
+### Option 1: PlatformPopScope (Recommended)
 
-`PlatformPopScope` 是一个跨平台的封装组件，会自动根据平台选择最佳实现：
+`PlatformPopScope` is a cross-platform wrapper that automatically selects the best implementation:
 
 ```dart
 import 'package:popscope_ios_plus/popscope_ios_plus.dart';
@@ -75,39 +77,39 @@ class MyPage extends StatelessWidget {
     return PlatformPopScope(
       canPop: false,
       onPop: () {
-        // 显示确认对话框
+        // Show confirmation dialog
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
-            title: const Text('确认退出？'),
+            title: const Text('Confirm Exit?'),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('取消'),
+                child: const Text('Cancel'),
               ),
               TextButton(
                 onPressed: () {
-                  Navigator.pop(context); // 关闭对话框
-                  Navigator.pop(context); // 返回上一页
+                  Navigator.pop(context); // Close dialog
+                  Navigator.pop(context); // Go back
                 },
-                child: const Text('确认'),
+                child: const Text('Confirm'),
               ),
             ],
           ),
         );
       },
       child: Scaffold(
-        appBar: AppBar(title: const Text('我的页面')),
-        body: const Center(child: Text('尝试左滑返回')),
+        appBar: AppBar(title: const Text('My Page')),
+        body: const Center(child: Text('Try swiping left to go back')),
       ),
     );
   }
 }
 ```
 
-### 方式二：使用 IosPopInterceptor
+### Option 2: IosPopInterceptor
 
-如果只需要在 iOS 上拦截手势，可以直接使用 `IosPopInterceptor`：
+For iOS-only gesture interception, use `IosPopInterceptor` directly:
 
 ```dart
 import 'package:popscope_ios_plus/popscope_ios_plus.dart';
@@ -117,21 +119,21 @@ class MyPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return IosPopInterceptor(
       onPopGesture: () {
-        // 处理返回手势
+        // Handle back gesture
         Navigator.maybePop(context);
       },
       child: Scaffold(
-        appBar: AppBar(title: const Text('我的页面')),
-        body: const Center(child: Text('尝试左滑返回')),
+        appBar: AppBar(title: const Text('My Page')),
+        body: const Center(child: Text('Try swiping left to go back')),
       ),
     );
   }
 }
 ```
 
-### 方式三：手动注册回调
+### Option 3: Manual Callback Registration
 
-如果需要更细粒度的控制，可以手动注册和注销回调：
+For fine-grained control, manually register and unregister callbacks:
 
 ```dart
 import 'package:popscope_ios_plus/popscope_ios_plus.dart';
@@ -147,10 +149,10 @@ class _MyPageState extends State<MyPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // 注册回调，传入 context 作为唯一标识，确保只有当前页面在顶层时才触发
+    // Register callback with context as unique identifier
     if (!_isRegistered) {
       PopscopeIos.registerPopGestureCallback(() {
-        // 处理返回手势
+        // Handle back gesture
         Navigator.maybePop(context);
       }, context);
       _isRegistered = true;
@@ -159,7 +161,7 @@ class _MyPageState extends State<MyPage> {
 
   @override
   void dispose() {
-    // 使用 context 注销回调，避免内存泄漏
+    // Unregister using context to prevent memory leaks
     if (_isRegistered) {
       PopscopeIos.unregisterPopGestureCallback(context);
     }
@@ -169,14 +171,14 @@ class _MyPageState extends State<MyPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('我的页面')),
-      body: const Center(child: Text('尝试左滑返回')),
+      appBar: AppBar(title: const Text('My Page')),
+      body: const Center(child: Text('Try swiping left to go back')),
     );
   }
 }
 ```
 
-## 完整示例
+## Complete Example
 
 ```dart
 import 'package:flutter/material.dart';
@@ -203,7 +205,7 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('首页')),
+      appBar: AppBar(title: const Text('Home')),
       body: Center(
         child: ElevatedButton(
           onPressed: () {
@@ -212,7 +214,7 @@ class HomePage extends StatelessWidget {
               MaterialPageRoute(builder: (_) => const DetailPage()),
             );
           },
-          child: const Text('进入详情页'),
+          child: const Text('Go to Detail Page'),
         ),
       ),
     );
@@ -230,16 +232,16 @@ class DetailPage extends StatelessWidget {
         final shouldPop = await showDialog<bool>(
           context: context,
           builder: (context) => AlertDialog(
-            title: const Text('确认退出？'),
-            content: const Text('你确定要离开这个页面吗？'),
+            title: const Text('Confirm Exit?'),
+            content: const Text('Are you sure you want to leave?'),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: const Text('取消'),
+                child: const Text('Cancel'),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, true),
-                child: const Text('确认'),
+                child: const Text('Confirm'),
               ),
             ],
           ),
@@ -249,9 +251,9 @@ class DetailPage extends StatelessWidget {
         }
       },
       child: Scaffold(
-        appBar: AppBar(title: const Text('详情页')),
+        appBar: AppBar(title: const Text('Detail Page')),
         body: const Center(
-          child: Text('尝试左滑返回或点击返回按钮'),
+          child: Text('Try swiping left or tapping back button'),
         ),
       ),
     );
@@ -259,106 +261,106 @@ class DetailPage extends StatelessWidget {
 }
 ```
 
-## API 文档
+## API Documentation
 
 ### PlatformPopScope
 
-跨平台的 PopScope 封装组件，自动处理 iOS 和其他平台的差异。
+Cross-platform PopScope wrapper that automatically handles iOS and other platform differences.
 
-| 参数 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| `child` | `Widget` | 是 | 子组件 |
-| `canPop` | `bool` | 是 | 是否允许直接返回 |
-| `onPop` | `VoidCallback` | 是 | 当 `canPop` 为 `false` 时，用户尝试返回时的回调 |
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `child` | `Widget` | Yes | Child widget |
+| `canPop` | `bool` | Yes | Whether direct navigation is allowed |
+| `onPop` | `VoidCallback` | Yes | Callback when user attempts to navigate back with `canPop` set to `false` |
 
 ### IosPopInterceptor
 
-iOS 专用的边缘滑动手势拦截器。
+iOS-specific edge swipe gesture interceptor.
 
-| 参数 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| `child` | `Widget` | 是 | 子组件 |
-| `onPopGesture` | `VoidCallback` | 是 | 左滑返回手势触发时的回调 |
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `child` | `Widget` | Yes | Child widget |
+| `onPopGesture` | `VoidCallback` | Yes | Callback when left-edge swipe gesture is triggered |
 
 ### PopscopeIos
 
-静态 API 类，提供底层的回调注册和注销方法。
+Static API class providing low-level callback registration and unregistration methods.
 
-| 方法 | 说明 |
-|------|------|
-| `registerPopGestureCallback(callback, context)` | 注册左滑返回手势回调，使用 context 作为唯一标识 |
-| `unregisterPopGestureCallback(context)` | 使用 context 注销回调 |
+| Method | Description |
+|--------|-------------|
+| `registerPopGestureCallback(callback, context)` | Register swipe back gesture callback using context as unique identifier |
+| `unregisterPopGestureCallback(context)` | Unregister callback using context |
 
-## 常见问题
+## FAQ
 
-### Q: 插件会影响 Android 平台吗？
+### Q: Does this plugin affect Android?
 
-A: 不会。这个插件仅在 iOS 平台生效，Android 平台会忽略这些调用。`PlatformPopScope` 在 Android 上会自动使用标准的 `PopScope`。
+A: No. This plugin only works on iOS. Android ignores these calls. `PlatformPopScope` automatically uses standard `PopScope` on Android.
 
-### Q: 如何在多个页面使用？
+### Q: How to use on multiple pages?
 
-A: 插件使用回调栈机制，支持多个页面同时注册回调。只有栈顶（最后注册且页面仍在顶层）的回调会被调用。组件销毁时会自动清理回调。
+A: The plugin uses a callback stack mechanism, supporting multiple pages registering callbacks simultaneously. Only the top-most valid callback (last registered and page still at top) gets invoked. Callbacks auto-cleanup when component is destroyed.
 
-### Q: 为什么推荐使用 Widget 方式？
+### Q: Why use Widget approach?
 
-A: Widget 方式（`PlatformPopScope` 或 `IosPopInterceptor`）会自动处理：
-- 回调的注册和注销
-- 生命周期管理
-- 资源清理
+A: Widget approach (`PlatformPopScope` or `IosPopInterceptor`) automatically handles:
+- Callback registration and unregistration
+- Lifecycle management
+- Resource cleanup
 
-手动调用 API 需要自己管理这些，容易遗漏导致内存泄漏。
+Manual API calls require managing these yourself, making it easy to miss cleanup and cause memory leaks.
 
-### Q: 插件如何工作的？
+### Q: How does the plugin work?
 
-A: 插件通过以下步骤拦截 iOS 左滑返回手势：
+A: The plugin intercepts iOS left-edge swipe gestures through these steps:
 
-1. 在 iOS 原生层，获取 `UINavigationController` 的 `interactivePopGestureRecognizer`
-2. 设置自己为手势识别器的代理（delegate）
-3. 在 `gestureRecognizerShouldBegin` 方法中拦截手势
-4. 通过 Method Channel 通知 Flutter 层
-5. Flutter 层调用注册的回调函数
-6. 返回 `false` 阻止系统默认的返回行为
+1. On iOS native side, get `UINavigationController`'s `interactivePopGestureRecognizer`
+2. Set itself as gesture recognizer's delegate
+3. Intercept gesture in `gestureRecognizerShouldBegin` method
+4. Notify Flutter side via Method Channel
+5. Flutter side invokes registered callback
+6. Return `false` to prevent system's default back behavior
 
-## 技术实现
+## Technical Implementation
 
-### iOS 端
+### iOS Side
 
-- 拦截 `UINavigationController.interactivePopGestureRecognizer`
-- 实现 `UIGestureRecognizerDelegate` 协议
-- 在手势触发时通过 Method Channel 发送 `onSystemBackGesture` 事件
+- Intercepts `UINavigationController.interactivePopGestureRecognizer`
+- Implements `UIGestureRecognizerDelegate` protocol
+- Sends `onSystemBackGesture` event via Method Channel when gesture triggers
 
-### Flutter 端
+### Flutter Side
 
-- 维护回调栈，支持多页面注册
-- 回调条目包含 `BuildContext`，用于检查页面是否还在顶层
-- 只有有效的栈顶回调会被调用
-- 组件销毁时自动清理对应的回调
+- Maintains callback stack supporting multi-page registration
+- Callback entries contain `BuildContext` to check if page is still at top
+- Only valid top-most callback gets invoked
+- Auto cleanup on component destruction
 
-## 兼容性
+## Compatibility
 
 - Flutter: >=3.3.0
 - iOS: >=12.0
 - Dart: >=3.0.0
 
-## 与 cupertino_will_pop_scope 的对比
+## Comparison with cupertino_will_pop_scope
 
-| 特性 | popscope_ios_plus | cupertino_will_pop_scope |
-|------|--------------|-------------------------|
-| 多页面支持 | 回调栈机制，互不干扰 | 全局状态，可能冲突 |
-| 生命周期管理 | 自动清理 | 需手动管理 |
-| API 设计 | 注册/注销模式 | 全局设置模式 |
-| Widget 封装 | PlatformPopScope | CupertinoWillPopScope |
+| Feature | popscope_ios_plus | cupertino_will_pop_scope |
+|---------|------------------|--------------------------|
+| Multi-page Support | Callback stack, no conflicts | Global state, potential conflicts |
+| Lifecycle Management | Auto cleanup | Manual management |
+| API Design | Register/unregister pattern | Global setter pattern |
+| Widget Wrapper | PlatformPopScope | CupertinoWillPopScope |
 
-## 许可证
+## License
 
 MIT License
 
-## 贡献
+## Contributing
 
-欢迎提交 Issue 和 Pull Request！
+Issues and Pull Requests are welcome!
 
 GitHub: [https://github.com/zyyziyunying/popscope_ios_plus](https://github.com/zyyziyunying/popscope_ios_plus)
 
-## 更新日志
+## Changelog
 
-查看 [CHANGELOG.md](CHANGELOG.md) 了解版本更新信息。
+See [CHANGELOG.md](CHANGELOG.md) for version history.
