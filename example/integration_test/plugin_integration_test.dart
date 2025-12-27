@@ -10,7 +10,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
-import 'package:popscope_ios/popscope_ios.dart';
+import 'package:popscope_ios_plus/popscope_ios.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();

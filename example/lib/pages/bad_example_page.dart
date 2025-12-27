@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:popscope_ios/utils/logger.dart';
+import 'package:popscope_ios_plus/utils/logger.dart';
 import 'package:popscope_ios_example/widgets/step_item.dart';
 import 'package:popscope_ios_example/widgets/confirm_pop_dialog.dart';
-import 'package:popscope_ios/popscope_ios.dart';
+import 'package:popscope_ios_plus/popscope_ios.dart';
 
 /// 负面示例：使用已废弃的 setOnLeftBackGesture 方法
 ///

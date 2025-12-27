@@ -1,17 +1,35 @@
-# popscope_ios
+# popscope_ios_plus
 
-一个用于拦截和处理 iOS 系统左滑返回手势的 Flutter 插件。
+一个用于拦截和处理 iOS 系统左滑返回手势的增强版 Flutter 插件。
 
-[![pub package](https://img.shields.io/pub/v/popscope_ios.svg)](https://pub.dev/packages/popscope_ios)
+[![pub package](https://img.shields.io/pub/v/popscope_ios_plus.svg)](https://pub.dev/packages/popscope_ios_plus)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+> **注意**：这是 [popscope_ios](https://pub.dev/packages/popscope_ios) 的增强版本 (Plus)，提供了更好的性能、更完善的文档和更安全的 API 设计。
+
+## ✨ 相比原版的改进
+
+| 特性 | popscope_ios | popscope_ios_plus |
+|------|--------------|-------------------|
+| **回调管理** | Token 基础 | Context 基础 ✅ |
+| **性能** | O(n) 操作 | O(1) 操作 ✅ |
+| **自动清理** | 仅手动 | 自动 + 手动 ✅ |
+| **多页面支持** | 全局回调 | 页面级回调 ✅ |
+| **文档** | 基础 | 详尽 ✅ |
+| **最佳实践指南** | 无 | 有 ✅ |
+| **运行时验证** | 无 | 有 ✅ |
 
 ## 功能特性
 
-- 拦截 iOS 系统的左滑返回手势（interactivePopGesture）
-- 支持多页面同时注册回调，使用回调栈机制避免覆盖问题
-- 提供开箱即用的 Widget 组件（`PlatformPopScope`、`IosPopInterceptor`）
-- 自动处理生命周期和资源清理
-- 仅在 iOS 平台生效，对其他平台无影响
+- ✅ 拦截 iOS 系统的左滑返回手势（interactivePopGesture）
+- ✅ 使用 `BuildContext` 作为标识的页面级回调系统
+- ✅ 自动清理已销毁页面的回调，防止内存泄漏
+- ✅ O(1) 性能的回调查找和删除
+- ✅ 提供开箱即用的 Widget 组件（`PlatformPopScope`、`IosPopInterceptor`）
+- ✅ 自动处理生命周期和资源清理
+- ✅ 运行时验证和开发模式断言
+- ✅ 详细的最佳实践文档和错误示例
+- ✅ 仅在 iOS 平台生效，对其他平台无影响
 
 ## 为什么需要这个插件？
 
@@ -21,7 +39,7 @@
 2. 无法在用户滑动时显示确认对话框
 3. 无法执行自定义的返回逻辑
 
-`popscope_ios` 通过拦截 iOS 原生的 `interactivePopGestureRecognizer`，让你能够：
+`popscope_ios_plus` 通过拦截 iOS 原生的 `interactivePopGestureRecognizer`，让你能够：
 
 - 在用户执行滑动返回手势时收到回调
 - 执行自定义逻辑（如显示确认对话框、保存数据等）
@@ -33,7 +51,7 @@
 
 ```yaml
 dependencies:
-  popscope_ios: ^0.0.1
+  popscope_ios_plus: ^0.1.0
 ```
 
 然后运行：
@@ -49,7 +67,7 @@ flutter pub get
 `PlatformPopScope` 是一个跨平台的封装组件，会自动根据平台选择最佳实现：
 
 ```dart
-import 'package:popscope_ios/popscope_ios.dart';
+import 'package:popscope_ios_plus/popscope_ios_plus.dart';
 
 class MyPage extends StatelessWidget {
   @override
@@ -92,7 +110,7 @@ class MyPage extends StatelessWidget {
 如果只需要在 iOS 上拦截手势，可以直接使用 `IosPopInterceptor`：
 
 ```dart
-import 'package:popscope_ios/popscope_ios.dart';
+import 'package:popscope_ios_plus/popscope_ios_plus.dart';
 
 class MyPage extends StatelessWidget {
   @override
@@ -116,7 +134,7 @@ class MyPage extends StatelessWidget {
 如果需要更细粒度的控制，可以手动注册和注销回调：
 
 ```dart
-import 'package:popscope_ios/popscope_ios.dart';
+import 'package:popscope_ios_plus/popscope_ios_plus.dart';
 
 class MyPage extends StatefulWidget {
   @override
@@ -162,7 +180,7 @@ class _MyPageState extends State<MyPage> {
 
 ```dart
 import 'package:flutter/material.dart';
-import 'package:popscope_ios/popscope_ios.dart';
+import 'package:popscope_ios_plus/popscope_ios_plus.dart';
 
 void main() {
   runApp(const MyApp());
@@ -324,7 +342,7 @@ A: 插件通过以下步骤拦截 iOS 左滑返回手势：
 
 ## 与 cupertino_will_pop_scope 的对比
 
-| 特性 | popscope_ios | cupertino_will_pop_scope |
+| 特性 | popscope_ios_plus | cupertino_will_pop_scope |
 |------|--------------|-------------------------|
 | 多页面支持 | 回调栈机制，互不干扰 | 全局状态，可能冲突 |
 | 生命周期管理 | 自动清理 | 需手动管理 |
@@ -339,7 +357,7 @@ MIT License
 
 欢迎提交 Issue 和 Pull Request！
 
-GitHub: [https://github.com/WoodJim/popscope_ios](https://github.com/WoodJim/popscope_ios)
+GitHub: [https://github.com/zyyziyunying/popscope_ios_plus](https://github.com/zyyziyunying/popscope_ios_plus)
 
 ## 更新日志
 

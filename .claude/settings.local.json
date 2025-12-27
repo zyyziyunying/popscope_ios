@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find . -name \"*.dart\" -type f ! -path \"./.dart_tool/*\" ! -path \"./build/*\" -exec sed -i '' 's/package:popscope_ios\\\\//package:popscope_ios_plus\\\\//g' {} ;)",
+      "Bash(flutter test)"
+    ]
+  }
+}

@@ -4,17 +4,17 @@
 import PackageDescription
 
 let package = Package(
-    name: "popscope_ios",
+    name: "popscope_ios_plus",
     platforms: [
         .iOS("13.0")
     ],
     products: [
-        .library(name: "popscope-ios", targets: ["popscope_ios"])
+        .library(name: "popscope-ios-plus", targets: ["popscope_ios_plus"])
     ],
     dependencies: [],
     targets: [
         .target(
-            name: "popscope_ios",
+            name: "popscope_ios_plus",
             dependencies: [],
             resources: [
                 // If your plugin requires a privacy manifest, for example if it uses any required

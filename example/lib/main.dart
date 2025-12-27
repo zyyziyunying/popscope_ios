@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:popscope_ios/popscope_ios.dart';
+import 'package:popscope_ios_plus/popscope_ios.dart';
 import 'package:cupertino_will_pop_scope/cupertino_will_pop_scope.dart';
 import 'package:popscope_ios_example/widgets/build_example_card.dart';
 import 'package:popscope_ios_example/pages/basic_example_page.dart';

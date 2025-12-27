@@ -186,13 +186,13 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "2.1.8"
-  popscope_ios:
+  popscope_ios_plus:
     dependency: "direct main"
     description:
       path: ".."
       relative: true
     source: path
-    version: "0.0.1"
+    version: "0.1.0"
   process:
     dependency: transitive
     description:

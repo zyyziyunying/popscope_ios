@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
-import 'package:popscope_ios/widgets/ios_pop_interceptor.dart';
+import 'package:popscope_ios_plus/widgets/ios_pop_interceptor.dart';
 
 /// 自适应的 PopScope 封装
 ///

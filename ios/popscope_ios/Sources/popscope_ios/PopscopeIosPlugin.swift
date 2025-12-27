@@ -32,7 +32,7 @@ public class PopscopeIosPlugin: NSObject, FlutterPlugin, UIGestureRecognizerDele
   /// 注意：此方法只创建 Method Channel，不会自动启用手势拦截。
   /// 需要 Flutter 层主动调用 enableInteractivePopGesture 才会启用。
   public static func register(with registrar: FlutterPluginRegistrar) {
-    let channel = FlutterMethodChannel(name: "popscope_ios", binaryMessenger: registrar.messenger())
+    let channel = FlutterMethodChannel(name: "popscope_ios_plus", binaryMessenger: registrar.messenger())
     let instance = PopscopeIosPlugin()
     instance.channel = channel
     registrar.addMethodCallDelegate(instance, channel: channel)

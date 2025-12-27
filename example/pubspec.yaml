@@ -1,5 +1,5 @@
-name: popscope_ios_example
-description: "Demonstrates how to use the popscope_ios plugin."
+name: popscope_ios_plus_example
+description: "Demonstrates how to use the popscope_ios_plus plugin."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -17,9 +17,9 @@ dependencies:
   flutter:
     sdk: flutter
 
-  popscope_ios:
+  popscope_ios_plus:
     # When depending on this package from a real application you should use:
-    #   popscope_ios: ^x.y.z
+    #   popscope_ios_plus: ^x.y.z
     # See https://dart.dev/tools/pub/dependencies#version-constraints
     # The example app is bundled with the plugin so we use a path dependency on
     # the parent directory to use the current plugin's version.
@@ -28,8 +28,8 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
-  
-  # 对比库：用于展示 popscope_ios 的优势
+
+  # 对比库：用于展示 popscope_ios_plus 的优势
   cupertino_will_pop_scope: ^1.2.1
 
 dev_dependencies:

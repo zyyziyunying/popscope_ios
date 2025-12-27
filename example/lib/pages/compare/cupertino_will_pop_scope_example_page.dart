@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:popscope_ios/utils/logger.dart';
+import 'package:popscope_ios_plus/utils/logger.dart';
 import 'package:popscope_ios_example/widgets/step_item.dart';
 import 'package:cupertino_will_pop_scope/cupertino_will_pop_scope.dart';
 

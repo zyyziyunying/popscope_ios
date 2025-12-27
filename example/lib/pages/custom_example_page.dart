@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:popscope_ios_example/widgets/step_item.dart';
 import 'package:popscope_ios_example/widgets/confirm_pop_dialog.dart';
-import 'package:popscope_ios/popscope_ios.dart';
+import 'package:popscope_ios_plus/popscope_ios.dart';
 
 /// 自定义处理示例页面
 ///

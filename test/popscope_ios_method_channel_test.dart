@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:popscope_ios/popscope_ios_method_channel.dart';
+import 'package:popscope_ios_plus/popscope_ios_method_channel.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   late MethodChannelPopscopeIos platform;
-  const MethodChannel channel = MethodChannel('popscope_ios');
+  const MethodChannel channel = MethodChannel('popscope_ios_plus');
 
   setUp(() {
     platform = MethodChannelPopscopeIos();
@@ -47,7 +47,7 @@ void main() {
 
       // 模拟原生端发送 onSystemBackGesture 事件
       await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
-        'popscope_ios',
+        'popscope_ios_plus',
         const StandardMethodCodec().encodeMethodCall(
           const MethodCall('onSystemBackGesture'),
         ),
@@ -72,7 +72,7 @@ void main() {
 
       // 模拟原生端发送事件
       await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
-        'popscope_ios',
+        'popscope_ios_plus',
         const StandardMethodCodec().encodeMethodCall(
           const MethodCall('onSystemBackGesture'),
         ),
@@ -119,7 +119,7 @@ void main() {
 
       // 模拟原生端发送事件
       await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
-        'popscope_ios',
+        'popscope_ios_plus',
         const StandardMethodCodec().encodeMethodCall(
           const MethodCall('onSystemBackGesture'),
         ),
@@ -143,7 +143,7 @@ void main() {
 
       // 模拟原生端发送事件
       await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
-        'popscope_ios',
+        'popscope_ios_plus',
         const StandardMethodCodec().encodeMethodCall(
           const MethodCall('onSystemBackGesture'),
         ),

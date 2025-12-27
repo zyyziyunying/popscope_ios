@@ -43,7 +43,7 @@ class _CallbackEntry {
 class MethodChannelPopscopeIos extends PopscopeIosPlatform {
   /// 用于与原生平台交互的 Method Channel
   @visibleForTesting
-  final methodChannel = const MethodChannel('popscope_ios');
+  final methodChannel = const MethodChannel('popscope_ios_plus');
 
   /// 系统返回手势的回调函数（旧版 API，保持兼容）
   VoidCallback? _onSystemBackGesture;

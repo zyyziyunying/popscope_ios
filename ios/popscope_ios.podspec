@@ -1,17 +1,17 @@
 #
 # To learn more about a Podspec see http://guides.cocoapods.org/syntax/podspec.html.
-# Run `pod lib lint popscope_ios.podspec` to validate before publishing.
+# Run `pod lib lint popscope_ios_plus.podspec` to validate before publishing.
 #
 Pod::Spec.new do |s|
-  s.name             = 'popscope_ios'
-  s.version          = '0.0.1'
-  s.summary          = 'A new Flutter project.'
+  s.name             = 'popscope_ios_plus'
+  s.version          = '0.1.0'
+  s.summary          = 'Enhanced iOS pop gesture interceptor for Flutter.'
   s.description      = <<-DESC
-A new Flutter project.
+Enhanced iOS pop gesture interceptor for Flutter. Provides fine-grained control over iOS left-edge swipe gestures with per-page callbacks, automatic cleanup, and better performance.
                        DESC
-  s.homepage         = 'http://example.com'
+  s.homepage         = 'https://github.com/zyyziyunying/popscope_ios_plus'
   s.license          = { :file => '../LICENSE' }
-  s.author           = { 'Your Company' => 'email@example.com' }
+  s.author           = { 'zyyziyunying' => 'zyyziyunying@163.com' }
   s.source           = { :path => '.' }
   s.source_files = 'popscope_ios/Sources/popscope_ios/**/*'
   s.dependency 'Flutter'
