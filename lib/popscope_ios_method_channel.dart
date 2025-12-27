@@ -184,14 +184,38 @@ class MethodChannelPopscopeIos extends PopscopeIosPlatform {
   ) {
     _ensureHandlerInitialized();
 
+    // 添加断言检查
+    assert(
+      context.mounted,
+      'Cannot register callback with unmounted context. '
+      'Make sure to call registerPopGestureCallback in didChangeDependencies() '
+      'or after the widget is mounted.',
+    );
+
+    // 验证 context 有效性（生产环境也会检查）
+    if (!context.mounted) {
+      PopscopeLogger.warn(
+        'Attempted to register callback with unmounted context: ${context.hashCode}. '
+        'Registration ignored.',
+      );
+      return;
+    }
+
     // 如果已经注册过，先移除旧的
     if (_callbackMap.containsKey(context)) {
       _callbackOrder.remove(context);
+      PopscopeLogger.debug(
+        'Re-registering callback for context: ${context.hashCode}',
+      );
     }
 
     // 添加到 Map 和顺序列表
     _callbackMap[context] = _CallbackEntry(callback, context);
     _callbackOrder.add(context);
+
+    PopscopeLogger.debug(
+      'Callback registered: context=${context.hashCode}, total=${_callbackOrder.length}',
+    );
 
     // 当注册回调时，启用 iOS 端的手势拦截
     _enableIosGestureIfNeeded();

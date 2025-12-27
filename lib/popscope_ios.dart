@@ -129,6 +129,12 @@ class PopscopeIos {
   /// - 当路由是 A->B->C，B 页面注册了回调，C 页面没有注册回调时，
   ///   只有 B 页面还在顶层时才会调用 B 页面的回调
   ///
+  /// **重要提示**：
+  /// 1. **必须在 didChangeDependencies() 中调用**，不要在 initState() 中调用
+  /// 2. **使用 `_isRegistered` 标志防止重复注册**，避免 InheritedWidget 更新时重复注册导致顺序混乱
+  /// 3. **必须在 dispose() 中注销回调**，避免内存泄漏
+  /// 4. BuildContext 在 State 生命周期中是稳定的，不会因为 setState() 或 didChangeDependencies() 而改变
+  ///
   /// 示例：
   /// ```dart
   /// class MyPage extends StatefulWidget {
@@ -137,26 +143,65 @@ class PopscopeIos {
   /// }
   ///
   /// class _MyPageState extends State<MyPage> {
+  ///   bool _isRegistered = false;  // ✅ 重要：使用标志位防止重复注册
+  ///
   ///   @override
   ///   void didChangeDependencies() {
   ///     super.didChangeDependencies();
-  ///     PopscopeIos.registerPopGestureCallback(() {
-  ///       print('检测到左滑返回手势');
-  ///       // 处理返回逻辑
-  ///     }, context);
+  ///     // ✅ 只在第一次调用时注册，避免 InheritedWidget 更新时重复注册
+  ///     if (!_isRegistered) {
+  ///       PopscopeIos.registerPopGestureCallback(() {
+  ///         print('检测到左滑返回手势');
+  ///         // 处理返回逻辑
+  ///         Navigator.maybePop(context);
+  ///       }, context);
+  ///       _isRegistered = true;
+  ///     }
   ///   }
   ///
   ///   @override
   ///   void dispose() {
-  ///     PopscopeIos.unregisterPopGestureCallback(context);
+  ///     // ✅ 必须注销回调
+  ///     if (_isRegistered) {
+  ///       PopscopeIos.unregisterPopGestureCallback(context);
+  ///     }
   ///     super.dispose();
   ///   }
+  /// }
+  /// ```
+  ///
+  /// **错误示例（不要这样做）**：
+  /// ```dart
+  /// // ❌ 错误：在 initState 中注册（context 可能未准备好）
+  /// @override
+  /// void initState() {
+  ///   super.initState();
+  ///   PopscopeIos.registerPopGestureCallback(() { ... }, context);
+  /// }
+  ///
+  /// // ❌ 错误：没有使用 _isRegistered 标志（可能重复注册）
+  /// @override
+  /// void didChangeDependencies() {
+  ///   super.didChangeDependencies();
+  ///   PopscopeIos.registerPopGestureCallback(() { ... }, context);  // 每次都会注册！
+  /// }
+  ///
+  /// // ❌ 错误：忘记在 dispose 中注销（内存泄漏）
+  /// @override
+  /// void dispose() {
+  ///   super.dispose();  // 忘记注销回调
   /// }
   /// ```
   static void registerPopGestureCallback(
     VoidCallback callback,
     BuildContext context,
   ) {
+    assert(
+      context.mounted,
+      'Cannot register callback with unmounted context. '
+      'Make sure to call this method in didChangeDependencies() with a valid BuildContext.',
+    );
+
     PopscopeIosPlatform.instance.registerPopGestureCallback(callback, context);
     PopscopeLogger.info(
       'registerPopGestureCallback context: ${context.hashCode}',

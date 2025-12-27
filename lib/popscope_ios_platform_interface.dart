@@ -67,6 +67,10 @@ abstract class PopscopeIosPlatform extends PlatformInterface {
     VoidCallback callback,
     BuildContext context,
   ) {
+    assert(
+      context.mounted,
+      'Cannot register callback with unmounted context',
+    );
     throw UnimplementedError(
       'registerPopGestureCallback() has not been implemented.',
     );
