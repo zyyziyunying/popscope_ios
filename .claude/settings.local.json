@@ -2,7 +2,10 @@
   "permissions": {
     "allow": [
       "Bash(find . -name \"*.dart\" -type f ! -path \"./.dart_tool/*\" ! -path \"./build/*\" -exec sed -i '' 's/package:popscope_ios\\\\//package:popscope_ios_plus\\\\//g' {} ;)",
-      "Bash(flutter test)"
+      "Bash(flutter test)",
+      "Bash(export https_proxy=http://127.0.0.1:7890 http_proxy=http://127.0.0.1:7890 all_proxy=socks5://127.0.0.1:7890)",
+      "Bash(mv /Users/zyyziyunying/popscope_ios/ios/popscope_ios.podspec /Users/zyyziyunying/popscope_ios/ios/popscope_ios_plus.podspec)",
+      "Bash(git add -A)"
     ]
   }
 }
