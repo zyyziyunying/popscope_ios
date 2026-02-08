@@ -1,30 +1,15 @@
 # popscope_ios_plus
 
-一个用于拦截和处理 iOS 系统左滑返回手势的增强版 Flutter 插件。
+一个用于拦截和处理 iOS 系统左滑返回手势的 Flutter 插件。
 
 [![pub package](https://img.shields.io/pub/v/popscope_ios_plus.svg)](https://pub.dev/packages/popscope_ios_plus)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-
-> **注意**：这是 [popscope_ios](https://pub.dev/packages/popscope_ios) 的增强版本 (Plus)，提供了更好的性能、更完善的文档和更安全的 API 设计。
-
-## ✨ 相比原版的改进
-
-| 特性 | popscope_ios | popscope_ios_plus |
-|------|--------------|-------------------|
-| **回调管理** | Token 基础 | Context 基础 ✅ |
-| **性能** | O(n) 操作 | O(1) 操作 ✅ |
-| **自动清理** | 仅手动 | 自动 + 手动 ✅ |
-| **多页面支持** | 全局回调 | 页面级回调 ✅ |
-| **文档** | 基础 | 详尽 ✅ |
-| **最佳实践指南** | 无 | 有 ✅ |
-| **运行时验证** | 无 | 有 ✅ |
 
 ## 功能特性
 
 - ✅ 拦截 iOS 系统的左滑返回手势（interactivePopGesture）
 - ✅ 使用 `BuildContext` 作为标识的页面级回调系统
 - ✅ 自动清理已销毁页面的回调，防止内存泄漏
-- ✅ O(1) 性能的回调查找和删除
 - ✅ 提供开箱即用的 Widget 组件（`PlatformPopScope`、`IosPopInterceptor`）
 - ✅ 自动处理生命周期和资源清理
 - ✅ 运行时验证和开发模式断言
@@ -339,15 +324,6 @@ A: 插件通过以下步骤拦截 iOS 左滑返回手势：
 - Flutter: >=3.3.0
 - iOS: >=12.0
 - Dart: >=3.0.0
-
-## 与 cupertino_will_pop_scope 的对比
-
-| 特性 | popscope_ios_plus | cupertino_will_pop_scope |
-|------|--------------|-------------------------|
-| 多页面支持 | 回调栈机制，互不干扰 | 全局状态，可能冲突 |
-| 生命周期管理 | 自动清理 | 需手动管理 |
-| API 设计 | 注册/注销模式 | 全局设置模式 |
-| Widget 封装 | PlatformPopScope | CupertinoWillPopScope |
 
 ## 许可证
 

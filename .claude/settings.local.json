@@ -4,8 +4,12 @@
       "Bash(find . -name \"*.dart\" -type f ! -path \"./.dart_tool/*\" ! -path \"./build/*\" -exec sed -i '' 's/package:popscope_ios\\\\//package:popscope_ios_plus\\\\//g' {} ;)",
       "Bash(flutter test)",
       "Bash(export https_proxy=http://127.0.0.1:7890 http_proxy=http://127.0.0.1:7890 all_proxy=socks5://127.0.0.1:7890)",
-      "Bash(mv /Users/zyyziyunying/popscope_ios/ios/popscope_ios.podspec /Users/zyyziyunying/popscope_ios/ios/popscope_ios_plus.podspec)",
-      "Bash(git add -A)"
+      "Bash(git add -A)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\n版本: 发布 v0.1.2\n\n- 修复 podspec 文件名与 s.name 不匹配的问题\n- 更新版本号至 0.1.2\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git push origin platform_popscope)",
+      "Bash(git tag v0.1.2)",
+      "Bash(git push origin v0.1.2)",
+      "Bash(cat /Users/zyyziyunying/popscope_ios/pubspec.yaml)"
     ]
   }
 }

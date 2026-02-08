@@ -1,32 +1,17 @@
 # popscope_ios_plus
 
-An enhanced Flutter plugin for intercepting and handling iOS left-edge swipe back gestures.
+A Flutter plugin for intercepting and handling iOS left-edge swipe back gestures.
 
 [![pub package](https://img.shields.io/pub/v/popscope_ios_plus.svg)](https://pub.dev/packages/popscope_ios_plus)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 [中文文档](README-ZH.md) | English
 
-> **Note**: This is an enhanced version (Plus) of [popscope_ios](https://pub.dev/packages/popscope_ios), offering better performance, comprehensive documentation, and safer API design.
-
-## ✨ Improvements Over Original
-
-| Feature | popscope_ios | popscope_ios_plus |
-|---------|-------------|-------------------|
-| **Callback Management** | Token-based | Context-based ✅ |
-| **Performance** | O(n) operations | O(1) operations ✅ |
-| **Auto Cleanup** | Manual only | Auto + Manual ✅ |
-| **Multi-page Support** | Global callback | Per-page callbacks ✅ |
-| **Documentation** | Basic | Comprehensive ✅ |
-| **Best Practices Guide** | No | Yes ✅ |
-| **Runtime Validation** | No | Yes ✅ |
-
 ## Features
 
 - ✅ Intercepts iOS system left-edge swipe back gesture (interactivePopGesture)
 - ✅ Per-page callback system using `BuildContext` as identifier
 - ✅ Auto cleanup for destroyed pages to prevent memory leaks
-- ✅ O(1) performance for callback lookup and removal
 - ✅ Ready-to-use Widget components (`PlatformPopScope`, `IosPopInterceptor`)
 - ✅ Automatic lifecycle and resource cleanup
 - ✅ Runtime validation and development mode assertions
@@ -341,15 +326,6 @@ A: The plugin intercepts iOS left-edge swipe gestures through these steps:
 - Flutter: >=3.3.0
 - iOS: >=12.0
 - Dart: >=3.0.0
-
-## Comparison with cupertino_will_pop_scope
-
-| Feature | popscope_ios_plus | cupertino_will_pop_scope |
-|---------|------------------|--------------------------|
-| Multi-page Support | Callback stack, no conflicts | Global state, potential conflicts |
-| Lifecycle Management | Auto cleanup | Manual management |
-| API Design | Register/unregister pattern | Global setter pattern |
-| Widget Wrapper | PlatformPopScope | CupertinoWillPopScope |
 
 ## License
 
