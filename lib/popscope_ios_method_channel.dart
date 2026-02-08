@@ -255,6 +255,33 @@ class MethodChannelPopscopeIos extends PopscopeIosPlatform {
     }
   }
 
+  /// [实验性] 启用直接边缘手势模式
+  ///
+  /// 该模式使用 UIScreenEdgePanGestureRecognizer 直接监听左边缘滑动，
+  /// 不依赖 UINavigationController。
+  ///
+  /// **注意**：此方法为实验性功能，用于 MVP 验证。
+  /// 生产环境请继续使用默认的 enableInteractivePopGesture。
+  ///
+  /// 验证点：
+  /// - 手势是否能正常触发
+  /// - 是否与 Flutter 手势冲突
+  /// - 在滑动列表时是否会误触发
+  /// - 手势灵敏度是否可接受
+  Future<void> enableDirectEdgeGesture() async {
+    _ensureHandlerInitialized();
+    try {
+      await methodChannel.invokeMethod('enableDirectEdgeGesture');
+      _iosGestureEnabled = true;
+      PopscopeLogger.debug('Direct edge gesture mode enabled');
+    } catch (e, stackTrace) {
+      PopscopeLogger.error(
+        'enableDirectEdgeGesture failed: $e\n$stackTrace',
+      );
+      rethrow;
+    }
+  }
+
   @override
   Future<String?> getPlatformVersion() async {
     _ensureHandlerInitialized();

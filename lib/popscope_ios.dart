@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'popscope_ios_platform_interface.dart';
+import 'popscope_ios_method_channel.dart';
 import 'utils/logger.dart';
 
 // 导出 widgets，方便用户使用
@@ -227,5 +228,27 @@ class PopscopeIos {
     PopscopeLogger.info(
       'unregisterPopGestureCallback context: ${context.hashCode}',
     );
+  }
+
+  // MARK: - 实验性 API
+
+  /// [实验性] 启用直接边缘手势模式进行测试
+  ///
+  /// 该模式使用 UIScreenEdgePanGestureRecognizer 直接监听左边缘滑动，
+  /// 不依赖 UINavigationController。
+  ///
+  /// **注意**：此方法仅用于 MVP 验证，生产环境不建议使用。
+  ///
+  /// 验证点：
+  /// - 手势是否能正常触发
+  /// - 是否与 Flutter 手势冲突
+  /// - 在滑动列表时是否会误触发
+  /// - 手势灵敏度是否可接受
+  static Future<void> enableDirectEdgeGestureForTesting() async {
+    final platform = PopscopeIosPlatform.instance;
+    if (platform is MethodChannelPopscopeIos) {
+      await platform.enableDirectEdgeGesture();
+      PopscopeLogger.info('Direct edge gesture mode enabled for testing');
+    }
   }
 }

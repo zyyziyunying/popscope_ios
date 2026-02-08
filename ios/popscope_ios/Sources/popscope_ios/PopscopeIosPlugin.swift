@@ -11,17 +11,30 @@ public class PopscopeIosPlugin: NSObject, FlutterPlugin, UIGestureRecognizerDele
   /// 用于访问 interactivePopGestureRecognizer 来拦截左滑返回手势
   /// 使用 weak 引用避免循环引用
   private weak var navigationController: UINavigationController?
-  
+
   /// 原始的手势识别器代理，用于保留系统默认行为
   ///
   /// 当拦截左滑手势时，其他手势（如右滑、点击等）仍交由原始代理处理，
   /// 确保不影响其他手势识别器的正常工作
   private var originalDelegate: UIGestureRecognizerDelegate?
-  
+
   /// 与 Flutter 通信的 Method Channel
   ///
   /// 用于向 Flutter 层发送手势事件通知（onSystemBackGesture）
   private var channel: FlutterMethodChannel?
+
+  // MARK: - Direct Mode (实验性)
+
+  /// [实验性] 直接模式的边缘手势识别器
+  ///
+  /// 使用 UIScreenEdgePanGestureRecognizer 直接监听左边缘滑动，
+  /// 不依赖 UINavigationController。
+  private var edgeGestureRecognizer: UIScreenEdgePanGestureRecognizer?
+
+  /// [实验性] 弱引用的 FlutterViewController
+  ///
+  /// 直接模式下用于添加边缘手势识别器
+  private weak var flutterViewController: FlutterViewController?
   
   /// 插件注册入口
   ///
@@ -109,10 +122,91 @@ public class PopscopeIosPlugin: NSObject, FlutterPlugin, UIGestureRecognizerDele
     // 保存原始的代理，用于处理非左滑返回的其他手势
     // 这样可以保持与其他手势识别器的兼容性
     self.originalDelegate = self.navigationController?.interactivePopGestureRecognizer?.delegate
-    
+
     // 将自己设置为新的代理，这样当左滑手势触发时，
     // gestureRecognizerShouldBegin 方法会被调用，可以进行拦截
     self.navigationController?.interactivePopGestureRecognizer?.delegate = self
+  }
+
+  // MARK: - Direct Mode Methods (实验性)
+
+  /// [实验性] 设置直接模式的边缘滑动手势识别
+  ///
+  /// 该方法直接在 FlutterViewController.view 上添加 UIScreenEdgePanGestureRecognizer，
+  /// 不需要依赖 UINavigationController。
+  ///
+  /// **优点**：
+  /// - 不需要修改视图层次结构（不需要包装 NavigationController）
+  /// - 更简单直接的实现方式
+  ///
+  /// **待验证**：
+  /// - 是否与 Flutter 内部手势冲突
+  /// - 在滑动列表时是否误触发
+  /// - 手势灵敏度是否可接受
+  private func setupDirectEdgeGesture() {
+    guard let window = UIApplication.shared.windows.first,
+          let rootVC = window.rootViewController else {
+      print("[PopscopeIos] Failed to get root view controller")
+      return
+    }
+
+    // 获取 FlutterViewController
+    let flutterVC: FlutterViewController?
+    if let fvc = rootVC as? FlutterViewController {
+      flutterVC = fvc
+    } else if let navVC = rootVC as? UINavigationController,
+              let fvc = navVC.viewControllers.first as? FlutterViewController {
+      flutterVC = fvc
+    } else {
+      flutterVC = nil
+    }
+
+    guard let targetVC = flutterVC else {
+      print("[PopscopeIos] Failed to find FlutterViewController")
+      return
+    }
+
+    // 保存引用
+    self.flutterViewController = targetVC
+
+    // 移除已有的边缘手势（如果有）
+    if let existingGesture = self.edgeGestureRecognizer {
+      targetVC.view.removeGestureRecognizer(existingGesture)
+    }
+
+    // 创建新的边缘手势识别器
+    let edgeGesture = UIScreenEdgePanGestureRecognizer(
+      target: self,
+      action: #selector(handleEdgeSwipe(_:))
+    )
+    edgeGesture.edges = .left
+    edgeGesture.delegate = self
+
+    // 添加到 FlutterViewController 的 view
+    targetVC.view.addGestureRecognizer(edgeGesture)
+    self.edgeGestureRecognizer = edgeGesture
+
+    print("[PopscopeIos] Direct edge gesture setup completed")
+  }
+
+  /// [实验性] 处理边缘滑动手势
+  ///
+  /// 当手势状态为 .began 时（手势刚开始），触发回调通知 Flutter 层
+  @objc private func handleEdgeSwipe(_ recognizer: UIScreenEdgePanGestureRecognizer) {
+    switch recognizer.state {
+    case .began:
+      // 手势开始时触发回调
+      channel?.invokeMethod("onSystemBackGesture", arguments: nil)
+      print("[PopscopeIos] Edge swipe detected (direct mode)")
+    case .changed:
+      // 可选：手势进行中，可用于实现跟手动画（MVP 不实现）
+      break
+    case .ended, .cancelled, .failed:
+      // 手势结束/取消/失败
+      break
+    default:
+      break
+    }
   }
 
   /// 处理来自 Flutter 层的方法调用
@@ -131,6 +225,13 @@ public class PopscopeIosPlugin: NSObject, FlutterPlugin, UIGestureRecognizerDele
       // 必须在主线程执行，因为涉及 UI 操作（修改 rootViewController）
       DispatchQueue.main.async {
         self.setupInteractivePopGestureIfNeeded()
+      }
+      result(nil)
+    case "enableDirectEdgeGesture":
+      // [实验性] Flutter 层调用此方法来启用直接边缘手势模式
+      // 必须在主线程执行，因为涉及 UI 操作
+      DispatchQueue.main.async {
+        self.setupDirectEdgeGesture()
       }
       result(nil)
     default:
